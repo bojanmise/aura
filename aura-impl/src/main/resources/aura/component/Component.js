@@ -1217,7 +1217,7 @@ Component.prototype.get = function(key) {
         if(!valueProvider){
             $A.assert(false, "Unable to get value for key '" + key + "'. No value provider was found for '" + root + "'.");
         }
-        
+
         var value;
         if($A.util.isFunction(valueProvider.get)){
             value = valueProvider.get(path.join('.'),this);
@@ -1608,7 +1608,7 @@ Component.prototype.getEvent = function(name) {
         if(context.enableAccessChecks) {
             if(context.logAccessFailures){
                 var ae = new $A.auraError(message);
-                ae["component"] = contextCmp && contextCmp.getDef().getDescriptor().getQualifiedName();
+                ae.setComponent(contextCmp && contextCmp.getDef().getDescriptor().getQualifiedName());
                 ae["componentStack"] = context && context.getAccessStackHierarchy();
                 $A.error(null, ae);
             }
@@ -1845,7 +1845,7 @@ Component.prototype.render = function() {
         try {
             var secureThis = $A.lockerService.wrapComponent(this);
             var result = render(secureThis, this["helper"]);
-            
+
             // Locker: anytime framework receive DOM elements from a locked down component
             // it should unwrap them before using them. For regular components, this is
             // a non-opt:
@@ -1933,7 +1933,7 @@ Component.prototype.unrender = function() {
         try {
             unrender($A.lockerService.wrapComponent(this), this["helper"]);
         } finally {
-            context.releaseCurrentAccess();            
+            context.releaseCurrentAccess();
         }
      } else {
         // If a component extends the root component and doesn't implement it's own
@@ -2076,7 +2076,7 @@ Component.prototype.createComponentStack = function(facets, valueProvider){
                     facetConfigAttr["valueProvider"] = (config["attributes"] && config["attributes"]["valueProvider"]) || valueProvider;
                     facetConfigClone["attributes"] = facetConfigAttr;
                     facetConfigClone["containerComponentId"] = this.globalId;
-                    components.push($A.componentService.createComponentPriv(facetConfigClone));                    
+                    components.push($A.componentService.createComponentPriv(facetConfigClone));
                 } finally {
                     context.releaseCurrentAccess();
                 }
@@ -2121,7 +2121,7 @@ Component.prototype.setupSuper = function(configAttributes) {
                             if(context.enableAccessChecks) {
                                 if(context.logAccessFailures){
                                     var ae = new $A.auraError(message);
-                                    ae["component"] = contextCmp && contextCmp.getDef().getDescriptor().getQualifiedName();
+                                    ae.setComponent(contextCmp && contextCmp.getDef().getDescriptor().getQualifiedName());
                                     ae["componentStack"] = context && context.getAccessStackHierarchy();
                                     $A.error(null, ae);
                                 }
@@ -2230,7 +2230,7 @@ Component.prototype.setupAttributes = function(config, localCreation) {
         var attributeType = attributeDef.getTypeDefDescriptor();
         var isFacet = attributeType === "aura://Aura.Component[]" || (attributeType === 'aura://Object' && this.isCollectionOfAuraComponentDefs(value));
         var isDefRef = attributeType === "aura://Aura.ComponentDefRef[]";
-        
+
         if (!setByDefault[attribute]){
             var def=AttributeSet.getDef(attribute,this.getDef());
             if(!$A.clientService.allowAccess(def[0],def[1])) {
@@ -2240,7 +2240,7 @@ Component.prototype.setupAttributes = function(config, localCreation) {
                 if(context.enableAccessChecks){
                     if(context.logAccessFailures){
                         var ae = new $A.auraError(message);
-                        ae["component"] = contextCmp && contextCmp.getDef().getDescriptor().getQualifiedName();
+                        ae.setComponent(contextCmp && contextCmp.getDef().getDescriptor().getQualifiedName());
                         ae["componentStack"] = context && context.getAccessStackHierarchy();
                         $A.error(null, ae);
                     }
@@ -2401,7 +2401,7 @@ Component.prototype.getMethodHandler = function(methodDef){
             if (context.enableAccessChecks) {
                 if (context.logAccessFailures) {
                     var ae = new $A.auraError(message);
-                    ae["component"] = contextCmp && contextCmp.getDef().getDescriptor().getQualifiedName();
+                    ae.setComponent(contextCmp && contextCmp.getDef().getDescriptor().getQualifiedName());
                     ae["componentStack"] = context && context.getAccessStackHierarchy();
                     $A.error(null, ae);
                 }
