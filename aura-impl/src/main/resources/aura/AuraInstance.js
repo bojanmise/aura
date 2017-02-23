@@ -21,7 +21,7 @@
  * @platform
  * @namespace
  * @alias $A
- * 
+ *
  * @borrows AuraClientService#enqueueAction as enqueueAction
  * @borrows AuraComponentService#createComponent as createComponent
  * @borrows AuraComponentService#createComponents as createComponents
@@ -961,7 +961,7 @@ AuraInstance.prototype.getCallback = function(callback) {
             // no need to wrap AFE with auraError as
             // customers who throw AFE would want to handle it with their own custom experience.
             if (e instanceof $A.auraError) {
-                e["component"] = e["component"] || contextComponent;
+                e.setComponent(e["component"] || contextComponent);
                 e["componentStack"] = e["componentStack"] || contextComponentStack;
                 $A.lastKnownError = e;
                 throw e;
@@ -992,11 +992,11 @@ AuraInstance.prototype.getCallback = function(callback) {
                 }
 
                 var errorWrapper = new $A.auraError("Error in $A.getCallback()", e);
-                errorWrapper["component"] = contextComponent;
-                errorWrapper["componentStack"] = contextComponentStack;
                 if (syntheticStackFrame) {
                     errorWrapper.setStackTrace(syntheticStackFrame + errorWrapper.stackTrace);
                 }
+                errorWrapper.setComponent(contextComponent);
+                errorWrapper["componentStack"] = contextComponentStack;
                 $A.lastKnownError = errorWrapper;
                 throw errorWrapper;
             }
