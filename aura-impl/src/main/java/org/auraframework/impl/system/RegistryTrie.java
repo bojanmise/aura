@@ -15,12 +15,7 @@
  */
 package org.auraframework.impl.system;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+
 
 import javax.annotation.Nonnull;
 
@@ -34,6 +29,14 @@ import org.auraframework.throwable.AuraError;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A specialized trie-ish structure for storing which registry gurgles which defs
@@ -100,11 +103,26 @@ public class RegistryTrie implements RegistrySet {
 
         for (DefRegistry reg : this.allRegistries) {
             boolean found = false;
-
-            for (String prefix : reg.getPrefixes()) {
-                if (matcher.matchPrefix(prefix)) {
-                    found = true;
-                    break;
+            
+            List<DefType> matcherDefTypes = matcher.getDefTypes();
+            if (matcherDefTypes == null) {
+                found = true;
+            } else {
+                for (DefType defType : matcherDefTypes) {
+                    if (reg.getDefTypes().contains(defType)) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (found) {
+                found = false;
+                for (String prefix : reg.getPrefixes()) {
+                    if (matcher.matchPrefix(prefix)) {
+                        found = true;
+                        break;
+                    }
                 }
             }
             if (found) {
