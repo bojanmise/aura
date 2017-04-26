@@ -15,9 +15,9 @@
     limitations under the License.
 
 -->
-<aura:interface support="PROTO">
-    <aura:attribute name="loading"           type="Boolean"  default="false"  description="Defines whether data is currently being loaded"/>
-    <aura:attribute name="hasMoreData"       type="Boolean"  default="true"   description="Defines whether there is more data or not"/>
-    <aura:attribute name="manualLoad"        type="Boolean"  default="false"  description="Disables automatic loading of data when hitting the end of the list"/>
+<aura:interface support="PROTO" description="Enables a component to be used as a template for the pull-to-refresh and pull-to-load events in ui:scroller.">
+    <aura:attribute name="loading"           type="Boolean"  default="false"  description="Defines whether data is currently being loaded. The default is false."/>
+    <aura:attribute name="hasMoreData"       type="Boolean"  default="true"   description="Defines whether there is more data or not. The default is true."/>
+    <aura:attribute name="manualLoad"        type="Boolean"  default="false"  description="Disables automatic loading of data when hitting the end of the list. The default is false."/>
     <aura:attribute name="manualLoadTrigger" type="Object"                    description="This is populated by the infiniteLoading plugin with a function that triggers loading of more data"/>
 </aura:interface>
