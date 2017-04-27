@@ -24,9 +24,10 @@
 	     <ul>
 	       <li>Enable vertical and horizontal scrolling using the <code>scroll</code> attribute.</li>
 	       <li>Display or hide the scroll bars using the <code>showScrollbars</code> attribute.</li>
-	       <li>Enable CSS transitions using <code>useCSSTransitions</code> attribute.</li>
+	       <li>Emulate scrolling with CSS transition using the <code>useCSSTransitions</code> attribute.</li>
 	       <li>Set the width and height of the scrollable view.</li>
 	       <li>Use pull-to-refresh and pull-to-load events to get data.</li>
+	       <li>Use infinite loading to load more data.</li>
 	       <li>Customize the scroller using plugins.</li>
 	     </ul>
 	     <p>This example creates a scrollable view with the default configuration.</p>
@@ -70,7 +71,7 @@ refreshEvent.setParams(event.getParams());
 refreshEvent.setComponentEvent().fire();</pre>
 	    
 	    <h4>Using a Template for Infinite Loading</h4>
-	    <p>Customize what users see when they pull-to-refresh or pull-to-load data using a template. The template must implement the <code>ui:scrollerInfiniteLoadingTemplate</code> interface.
+	    <p>Infinite loading is useful when you want to load more data as users scroll down. You can customize what users see when they load data using infinite loading using a template or use the defaults. The template must implement the <code>ui:scrollerInfiniteLoadingTemplate</code> interface.
 	    This example creates a scrollable view with a component passed in to the <code>infiniteLoadingTemplate</code> attribute, which implements the <code>ui:scrollerInfiniteLoadingTemplate</code> interface.</p>
 	    <pre>&lt;aura:component>
     &lt;ui:scroller aura:id="pullToRefresh" onPullToRefresh="{!c.replaceBodyContent}">
@@ -85,7 +86,7 @@ refreshEvent.setComponentEvent().fire();</pre>
 	     <p>This component supports the following methods provided by the ScrollerJS library.</p>
         <p><code>appendItems(data)</code>: Appends items to the scroller.</p>
         <p><code>destroy()</code>: Destroys the scroller.</p>
-        <p><code>on(eventType, fn, [context])</code>: Prepend an Array of elements into the scroller.</p>
+        <p><code>on(eventType, fn, [context])</code>: Prepends scroller-specific event listeners to the scroller.</p>
         <p><code>plug(plugin)</code>: Adds a plugin to the scroller.</p>
         <p><code>prependItems(data)</code>: Prepends items to the scroller.</p>
         <p><code>refresh()</code>: Refreshes the scroller size and enables plugins to update themselves.</p>
