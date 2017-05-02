@@ -322,7 +322,10 @@
             setTimeout($A.getCallback(function () {
                 if (component.isValid()) {
                     helper.position(component);
-                    component.getElement().style.opacity = 1;
+                    element = component.getElement();
+                    if (element) {
+                        element.style.opacity = 1;
+                    }
                 }
             }), 10);
         }
