@@ -515,7 +515,7 @@ AuraRenderingService.prototype.rerenderFacet = function(component, facet, refere
                 } else {
                     // This must use component.getElements() not this.getElements()
                     // Since we need a copy of the array.
-                    renderedElements=info.component.getElements();
+                    renderedElements=this.getAllElementsCopy(info.component);
                 }
                 info.component.disassociateElements();
                 this.associateElements(info.component, renderedElements);
@@ -527,8 +527,19 @@ AuraRenderingService.prototype.rerenderFacet = function(component, facet, refere
                 if (!this.isCommentMarker(marker)) {
                     if (updatedFacet.fullUnrender || !marker.nextSibling) {
                         this.setMarker(component, this.createMarker(marker,"unrender facet: " + component.getGlobalId()));
-                    } else if (info.component.isValid() && this.getElements(info.component)[0] === marker) {
-                        this.setMarker(component, marker.nextSibling);
+                    } else {
+                        var allElements = this.getAllElements(info.component);
+                        if (info.component.isValid() && allElements[0] === marker) {
+                            // We can't just assume the nextSibling, it could belong to what we're unrendering.
+                            // Find the next element that this unrendering component does not own.
+                            var count = allElements.length - 1;
+                            nextSibling = marker.nextSibling;
+                            while(count && nextSibling.nextSibling) {
+                                nextSibling = nextSibling.nextSibling;
+                                count--;
+                            }
+                            this.setMarker(component, nextSibling);
+                        }
                     }
                 }
 
@@ -575,7 +586,7 @@ AuraRenderingService.prototype.unrenderFacet = function(cmp,facet){
         this.unrender(facet);
     }
 
-    var elements = this.getElements(cmp);
+    var elements = this.getAllElements(cmp);
     var element;
     if(elements) {
         var globalId = cmp.getGlobalId();
@@ -955,12 +966,13 @@ AuraRenderingService.prototype.associateElements = function(cmp, elements) {
     elements = this.getArray(elements);
 
     var len = elements.length;
+    var element;
     for (var i = 0; i < len; i++) {
-        var element = elements[i];
-        if(this.isCommentMarker(element)){
-            continue;
+        element = elements[i];
+
+        if(!this.isCommentMarker(element)){
+            this.addAuraClass(cmp,element);
         }
-        this.addAuraClass(cmp,element);
         cmp.associateElement(element);
     }
 };
@@ -999,6 +1011,23 @@ AuraRenderingService.prototype.isCommentMarker = function(node){
 AuraRenderingService.prototype.getElements = function(component) {
     // avoid a slice of the elements collection
     return component.getConcreteComponent().elements || [];
+};
+
+/**
+ * Includes all the DOM elements the component output as part of its rendering cycle. 
+ * This method also returns the comment markers output as part of the component rendering cycle.
+ * If you do not want the comment nodes returned to you (your known set of dom nodes), use cmp.getElements() or renderingService.getElements(component)
+ */
+AuraRenderingService.prototype.getAllElements = function(component) {
+    return component.getConcreteComponent().allElements || [];
+};
+
+/**
+ * Similar to getAllElements, but this method will copy the allElements collection and return it. This allows you to modify the collection for processing
+ * during the renderingService without worring about mutating the component elements collection. 
+ */
+AuraRenderingService.prototype.getAllElementsCopy = function(component) {
+    return component.getConcreteComponent().allElements.slice(0) || [];
 };
 
 /**
