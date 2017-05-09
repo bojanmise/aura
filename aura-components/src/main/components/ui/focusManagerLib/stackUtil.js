@@ -92,7 +92,7 @@ function lib(focusUtil) { //eslint-disable-line no-unused-vars
             return undefined;
         }
         var selector = [];
-        while (element.nodeType === Node.ELEMENT_NODE) {
+        while (element && element.nodeType === Node.ELEMENT_NODE) {
             var path = element.nodeName.toLowerCase();
                 var sibling = element, index = 1;
                 while ((sibling = sibling.previousElementSibling)) {
