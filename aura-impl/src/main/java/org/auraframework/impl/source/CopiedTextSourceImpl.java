@@ -15,12 +15,14 @@
  */
 package org.auraframework.impl.source;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.auraframework.def.DefDescriptor;
 import org.auraframework.def.Definition;
 import org.auraframework.system.TextSource;
+import org.auraframework.util.IOUtil;
 import org.auraframework.util.text.Hash;
 
 /**
@@ -42,11 +44,11 @@ public class CopiedTextSourceImpl<D extends Definition> extends AbstractTextSour
         this.contents = original.getContents();
         this.defaultNamespace = original.getDefaultNamespace();
         this.lastModified = original.getLastModified();
-        
-        Hash.StringBuilder hashBuilder = new Hash.StringBuilder();
-        hashBuilder.addString(this.contents);
-        this.hash.setHash(hashBuilder.build().toString().getBytes());
-        
+        try {
+            IOUtil.readText(this.getHashingReader());
+        } catch (IOException ioe) {
+            // ignore - can't get this on a string reader.
+        }
     }
 
     @Override
