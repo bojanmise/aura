@@ -24,6 +24,7 @@ import org.auraframework.system.Parser.Format;
 import org.auraframework.test.source.StringSource;
 import org.auraframework.throwable.quickfix.InvalidDefinitionException;
 import org.auraframework.throwable.quickfix.QuickFixException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -40,6 +41,7 @@ public class InterfaceDefHandlerTest extends AuraImplTestCase {
      * @throws Exception
      */
     @Test
+    @Ignore
     public void testInterfaceDefHandler() throws Exception {
         String namespace = "auratest";
         DefDescriptor<InterfaceDef> descriptor = definitionService.getDefDescriptor(namespace + ":fakeparser", InterfaceDef.class);
@@ -59,6 +61,7 @@ public class InterfaceDefHandlerTest extends AuraImplTestCase {
      * @throws Exception
      */
     @Test
+    @Ignore
     public void testInterfaceDefHandlerWithExtension() throws Exception {
         DefDescriptor<InterfaceDef> descriptor = definitionService.getDefDescriptor("test:fakeparser", InterfaceDef.class);
         StringSource<InterfaceDef> source = new StringSource<>(
@@ -74,6 +77,7 @@ public class InterfaceDefHandlerTest extends AuraImplTestCase {
      * @throws Exception
      */
     @Test
+    @Ignore
     public void testInterfaceDefHandlerWithInvalidChildTag() throws Exception {
         DefDescriptor<InterfaceDef> descriptor = definitionService.getDefDescriptor("test:fakeparser", InterfaceDef.class);
         StringSource<InterfaceDef> source = new StringSource<>(
@@ -94,6 +98,7 @@ public class InterfaceDefHandlerTest extends AuraImplTestCase {
      * @throws Exception
      */
     @Test
+    @Ignore
     public void testInterfaceDefHandlerWithTextBetweenTag() throws Exception {
         DefDescriptor<InterfaceDef> descriptor = definitionService.getDefDescriptor("test:fakeparser", InterfaceDef.class);
         StringSource<InterfaceDef> source = new StringSource<>(
@@ -113,6 +118,7 @@ public class InterfaceDefHandlerTest extends AuraImplTestCase {
      * @throws QuickFixException
      */
 	@Test
+    @Ignore
     public void testSupportNotAllowedWithNonInternalNamespace() throws QuickFixException {
         String namespace = "fakeNamespace";
         DefDescriptor<InterfaceDef> descriptor = definitionService.getDefDescriptor(namespace + ":fakeparser", InterfaceDef.class);
