@@ -19,7 +19,7 @@
 	<aura:description>
 		<p>
 			A <code>ui:inputNumber</code> component represents a number input field, which is rendered as an HTML <code>input</code> element of type <code>text</code>.
-			It uses JavaScript's Number type to determine the supported number of digits, or up to 16 digits.
+			It uses JavaScript's Number type to determine the supported number of digits.
 	    </p>
 		<p>
 			This example shows a number field, which displays a value of <code>10</code>.
