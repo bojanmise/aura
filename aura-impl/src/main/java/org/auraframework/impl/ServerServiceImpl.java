@@ -619,21 +619,21 @@ public class ServerServiceImpl implements ServerService {
             if (manifestUtil.isManifestEnabled()) {
                 attributes.put("manifest", servletUtilAdapter.getManifestUrl(context, componentAttributes));
             }
-            
+
             servletUtilAdapter.writeScriptUrls(context, componentAttributes, sb);
-            
+
             attributes.put("auraNamespacesScriptTags", sb.toString());
             
             Map<String, Object> auraInit = Maps.newHashMap();
             if (componentAttributes != null && !componentAttributes.isEmpty()) {
                 auraInit.put("attributes", componentAttributes);
             }
-            
+
             Map<String, Object> namespaces = Maps.newHashMap();
             namespaces.put("internal", configAdapter.getInternalNamespaces());
             namespaces.put("privileged", configAdapter.getPrivilegedNamespaces());
             auraInit.put("ns", namespaces);
-            
+
             auraInit.put("descriptor", value.getDescriptor());
             auraInit.put("deftype", value.getDescriptor().getDefType());
             auraInit.put("host", context.getContextPath());
