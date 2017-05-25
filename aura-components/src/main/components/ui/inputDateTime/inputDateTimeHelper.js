@@ -18,7 +18,10 @@
 
     init: function (component) {
         if (component.get("v.disabled")) {
-            component.set("v.displayDatePicker", false);
+            if (component.get('v.displayDatePicker') && !component.get('v.useSingleInput')) {
+                this.cacheDefaultValues(component);
+                this.updateTimeFormat(component);
+            }
             // don't bother with the rest if the input is disabled
             return;
         }
@@ -255,6 +258,8 @@
     togglePickerIcon: function (component) {
         var openIconCmp = component.find("datePickerOpener");
         var openIconElem = openIconCmp ? openIconCmp.getElement() : null;
+        var openTimeIconCmp = component.find("timePickerOpener");
+        var openTimeIconElem = openTimeIconCmp ? openTimeIconCmp.getElement() : null;
         var clearCmp = component.find("clear");
         var clearElem = clearCmp ? clearCmp.getElement() : null;
 
@@ -266,7 +271,21 @@
                 $A.util.swapClass(clearElem, "hide", "display");
                 $A.util.swapClass(openIconElem, "display", "hide");
             }
-        }
+        } else {
+            if (component.get('v.displayDatePicker')) {
+                if ($A.util.getBooleanValue(component.get('v.disabled'))) {
+                    $A.util.swapClass(openIconElem, "display", "hide");
+                    if (openTimeIconElem) {
+                        $A.util.swapClass(openTimeIconElem, "display", "hide");
+                    }
+                } else {
+                    $A.util.swapClass(openIconElem, "hide", "display");
+                    if (openTimeIconElem) {
+                        $A.util.swapClass(openTimeIconElem, "hide", "display");
+                    }
+                }
+            }
+         }
     },
 
     handleDateTimeSelection: function (component, event) {
