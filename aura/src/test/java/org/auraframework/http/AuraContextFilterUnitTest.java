@@ -120,6 +120,6 @@ public class AuraContextFilterUnitTest {
             }
         }
 
-        return contextFilter.isModulesEnabled(request, configMap, mode);
+        return contextFilter.isModulesEnabled(request, configMap, mode, null);
     }
 }
