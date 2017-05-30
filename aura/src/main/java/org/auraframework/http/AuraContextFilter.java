@@ -245,7 +245,7 @@ public class AuraContextFilter implements Filter {
         context.setNum(num.get(request));
         context.setRequestedLocales(requestedLocales);
         context.setClient(new Client(request.getHeader(HttpHeaders.USER_AGENT)));
-        context.setModulesEnabled(isModulesEnabled(request, configMap, m));
+        context.setModulesEnabled(isModulesEnabled(request, configMap, m, null));
         context.setUseCompatSource(useCompatSource(request, m));
         if (configMap != null) {
             getLoaded(context, configMap.get("loaded"));
@@ -372,7 +372,7 @@ public class AuraContextFilter implements Filter {
      * @param mode Aura context mode
      * @return whether modules should be enabled
      */
-    protected boolean isModulesEnabled(HttpServletRequest request, Map<String, Object> configMap, Mode mode) {
+    protected boolean isModulesEnabled(HttpServletRequest request, Map<String, Object> configMap, Mode mode, Format format) {
         if (configMap != null) {
             // configMap is present when processing requests with url encoded AuraContext ie app.js
             if (configMap.containsKey("m")) {
