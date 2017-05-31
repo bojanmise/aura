@@ -29,5 +29,30 @@ Aura.ExportsModule = {
             r[cmpKey] = $A.get('$Label.' + key);
             return r;
         }, {});
+    },
+    "fetchGlobalControllerAction": function (type, params) {
+        var normalizeType = type.charAt(0).toUpperCase() + type.slice(1);
+        var controllerName = 'c.aura://' + normalizeType + 'Controller.getComponent';
+        var action = $A.get(controllerName);
+
+        if (!action) {
+            return Promise.reject(new Error('Controller for type: ' + type + ' is not registered'));
+        }
+        action.setParams(params);
+
+        return new Promise(function (resolve, reject) {
+            action.setBackground();
+            $A.enqueueAction(action);
+            action.setCallback(null, function (response) {
+                if (response.getState() !== 'SUCCESS') {
+                    reject(new Error('Error fetching component: ' + JSON.stringify(response.getError())));
+                }
+                resolve(response.getReturnValue());
+            });
+        });
+    },
+    "registerModule": function (module) {
+        $A.componentService.initModuleDefs([module]);
+        return $A.componentService.evaluateModuleDef(module["descriptor"]);
     }
 };

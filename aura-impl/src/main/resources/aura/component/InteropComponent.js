@@ -37,6 +37,7 @@ function InteropComponent(config) {
     this.localId = config['localId'];
     this.attributeValueProvider = config['attributes']['valueProvider'];
     this.owner = context.getCurrentAccess();
+    this.currentClassMap = {};
 
     this.setupGlobalId(config['globalId']);
 
@@ -74,11 +75,13 @@ InteropComponent.prototype.setupAttributes = function(config) {
     var configValues = config && config['values'] || {};
     var attributes = {};
     var self = this;
+
     var changeHandlerPRVFactory = function(ctx, attr) {
         return function (/*event*/) {
             ctx.attributeChange(attr || this.handler.key, ctx.get('v.' + (attr ? attr : this.handler.key)));
         };
     };
+
     var changeHandlerFCV = function (attr, fcv /*, event*/) {
         this.attributeChange(attr, fcv.evaluate());
     };
@@ -120,12 +123,41 @@ InteropComponent.prototype.setupAttributes = function(config) {
             }
         }
 
-        // Check is on the definition and assign it as an attribute
-        $A.assert(isEvent || attribute in this.interopDef["props"]);
+
+        // Check is attribute is in the definition or is an HTML Global attribute then
+        // assign it as an attribute
+        var isAttrInDefinition =  attribute in this.interopDef["props"];
+        var assertionMessage = '"' + attribute  + '" must either be a public property of ' + this.getName() + ' or a global HTML attribute';
+
+        $A.assert(isEvent || isAttrInDefinition || this.isHtmlGlobalAttr(attribute), assertionMessage);
         attributes[attribute] = valueConfig;
     }
-
+    
     return attributes;
+};
+
+
+InteropComponent.prototype.isHtmlGlobalAttr = function (attrName) {
+    return InteropComponent.HTML_GLOBAL_ATTRS[attrName] || false;
+};
+
+InteropComponent.HTML_GLOBAL_ATTRS = {
+    'title': true,
+    'accesskey': true,
+    'tabindex': true,
+    'class': true,
+    'contenteditable': true,
+    'contextmenu': true,
+    'dir': true,
+    'draggable': true,
+    'dropzone': true,
+    'hidden': true,
+    'id': true,
+    'lang' : true,
+    'spellcheck': true,
+    'style': true,
+    'translate': true,
+    'role': true
 };
 
 InteropComponent.prototype.setupMethods = function () {
@@ -142,10 +174,112 @@ InteropComponent.prototype.setupMethods = function () {
     });
 };
 
+/**
+ * Function called when an attribute changed in Aura lang
+ * @param key - { String }
+ * @param value - { String }
+ */
 InteropComponent.prototype.attributeChange = function (key, value) {
     if (this.rendered) {
-        var elmt = this.getElement();
-        elmt[key] = value;
+        var element = this.getElement();
+
+        if (this.isHtmlGlobalAttr(key)) {
+            this.setGlobalAttribute(element, key, value);
+        } else {
+            element[key] =  value;
+        }
+    }
+};
+
+
+InteropComponent._classNameCacheMap = {};
+
+/**
+ * Creates a hash map for a given className string
+ * e.g. `slds-grid slds-col` => { 'slds-grid': true, 'slds-col': true }
+ * @param className
+ * @returns {Object}
+ */
+InteropComponent.prototype.getMapFromClassName = function (className) {
+
+    if (className === undefined || className == null || className === '') {
+        return {};
+    }
+
+    var SPACE_CHAR = 32;
+    var map = InteropComponent._classNameCacheMap[className];
+
+    if (map) {
+        return map;
+    }
+
+    map = {};
+
+    var start = 0;
+    var i, len = className.length;
+
+    for (i = 0; i < len; i++) {
+        if (className.charCodeAt(i) === SPACE_CHAR) {
+            if (i > start) {
+                map[className.slice(start, i)] = true;
+            }
+            start = i + 1;
+        }
+    }
+
+    if (i > start) {
+        map[className.slice(start, i)] = true;
+    }
+
+    InteropComponent._classNameCacheMap[className] = map;
+    return map;
+};
+
+/**
+ * Update the class attribute in the custom element, it makes a diff in between the previous class names
+ * @param element
+ * @param value
+ */
+InteropComponent.prototype.updateClassAttribute = function (element, value) {
+    var currentClassMap = this.currentClassMap;
+    $A.assert(currentClassMap !== null && (typeof currentClassMap === 'object'), 'Current Class Map must be an object.');
+    
+    var classMap = this.getMapFromClassName(value);
+
+    Object.keys(currentClassMap).forEach(function (className) {
+        if (!classMap[className]) {
+            element.classList.remove(className);
+        }
+    });
+
+    Object.keys(classMap).forEach(function (className) {
+        if (!currentClassMap[className]) {
+            element.classList.add(className);
+        }
+    });
+
+    this.currentClassMap = classMap;
+};
+
+
+/**
+ * Implement special logic for set HTML Global Attributes
+ * @param element {node}
+ * @param attrName { string }
+ * @param value { any }
+ */
+InteropComponent.prototype.setGlobalAttribute = function (element, attrName, value) {
+    if (attrName === 'class') {
+        this.updateClassAttribute(element, value);
+        return;
+    }
+
+    if (value === true) {
+        element.setAttribute(attrName, "");
+    } else if (value === false || value === null || value === undefined) {
+        element.removeAttribute(attrName);
+    } else {
+        element.setAttribute(attrName, value);
     }
 };
 
@@ -153,8 +287,7 @@ InteropComponent.prototype.attributeChange = function (key, value) {
  * Returns the value referenced using property syntax.
  * For example, <code>cmp.get('v.attr')</code> returns the value of the attr aura:attribute.
  *
- * @param {String}
- *            key - The data key to look up on the Component.
+ * @param {String} key - The data key to look up on the Component.
  * @public
  * @platform
  * @export
@@ -175,8 +308,8 @@ InteropComponent.prototype.get = function (key) {
  * @export
  */
 InteropComponent.prototype.set = function (key, value) {
-    key = $A.expressionService.normalize(key);
-    var path = key.split('.');
+    var normalizedKey  = $A.expressionService.normalize(key);
+    var path = normalizedKey.split('.');
     var provider = path.shift();
 
     $A.assert(provider === 'v', 'This component does not allow mutations on controller actions');
@@ -194,10 +327,7 @@ InteropComponent.prototype.set = function (key, value) {
         attrValue.value.set(value);
     } else {
         this.attributes[expr] = value;
-        if (this.rendered) {
-            var elmt = this.getElement();
-            elmt[expr] = value;
-        }
+        this.attributeChange(expr, value);
     }
 };
 
@@ -207,21 +337,22 @@ InteropComponent.prototype.set = function (key, value) {
  */
 InteropComponent.prototype.render = function () {
     var Ctor = this.interopClass;
-    var elmt = window["Engine"]['createElement'](this.componentDef.elementName, { 'is': Ctor });
+    var element = window["Engine"]['createElement'](this.componentDef.elementName, { 'is': Ctor });
     var cmp = this;
 
-    Object.keys(this.attributes).forEach(function (p) {
-        var attr = cmp.get('v.' + p);
-        if (attr !== undefined) {
-            if (p.indexOf('on') === 0) {
-                elmt.addEventListener(p.substring(2), attr, false);
-            } else {
-                elmt[p] = attr;
-            }
-        }
-    });
+    Object.keys(this.attributes).forEach(function (attrName) {
+        var value = cmp.get('v.' + attrName);
 
-    return [elmt];
+        if (attrName.indexOf('on') === 0) {
+            element.addEventListener(attrName.substring(2), value, false);
+        } else if (this.isHtmlGlobalAttr(attrName)) {
+            this.setGlobalAttribute(element, attrName, value);
+        } else {
+            element[attrName] = value;
+        }
+    }.bind(this));
+
+    return [element];
 };
 
 /**
