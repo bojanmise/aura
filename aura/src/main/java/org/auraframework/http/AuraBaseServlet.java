@@ -96,10 +96,10 @@ public abstract class AuraBaseServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        processInjection(config);
+        processInjection(config, null);
     }
     
-    public void processInjection(ServletConfig config) {
+    public void processInjection(ServletConfig config, String name) {
         SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
 
