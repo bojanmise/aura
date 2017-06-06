@@ -27,7 +27,7 @@ itest:
       optional_history_file: null
       properties_name: aura.version
   ftest_labels: [~ignore,aura.sanity,aura.precheckin,one.precheckin,precheckin,precheckin.phantomjs]
-  ab_enabled: true
+  ab_enabled: false
 
 script:
   localedef -v -c -i en_US -f UTF-8 en_US.UTF-8
@@ -45,7 +45,7 @@ script:
   chown -R mvn-user $(pwd)
   status=0
   sudo -iu mvn-user bash -c "cd $(pwd);mvn clean deploy $MAVEN_ARGS -Dmaven.repo.local=$(pwd)/.m2/repository -DaltDeploymentRepository=zen::default::file://$(pwd)/$LOCAL_DEPLOY_DIR -Dnode.download.root.url=http://localhost/node/ -Dchromedriver.download.root.url=http://localhost/chromedriver -Dnpm.download.root.url=http://localhost/npm/" -DskipUnitTests || export status=$? || true
-  [ ${status} -eq 0 ] && sudo -iu mvn-user bash -c "cd $(pwd);set -x;export LANG=\"en_US.UTF-8\";mvn verify $MAVEN_ARGS -Dmaven.repo.local=$(pwd)/.m2/repository -DaltDeploymentRepository=zen::default::file://$(pwd)/$LOCAL_DEPLOY_DIR -Dnode.download.root.url=http://localhost/node/ -Dchromedriver.download.root.url=http://localhost/chromedriver -Dnpm.download.root.url=http://localhost/npm/ -Pdesktop -DskipJsDoc -DskipComponentCompile -DskipUnitTests -DrunIntTests -Dwebdriver.browser.type=GOOGLECHROME -Dwebdriver.chrome.nosandbox=true -Dwebdriver.reusebrowser=true -Dwebdriver.timeout=90 -Dwebdriver.timeout.getdriver=30 -DtestThreadCount=3" -DtestNameContains=jsmock || export status=$? || true
+  [ ${status} -eq 0 ] && sudo -iu mvn-user bash -c "cd $(pwd);set -x;export LANG=\"en_US.UTF-8\";mvn verify $MAVEN_ARGS -Dmaven.repo.local=$(pwd)/.m2/repository -DaltDeploymentRepository=zen::default::file://$(pwd)/$LOCAL_DEPLOY_DIR -Dnode.download.root.url=http://localhost/node/ -Dchromedriver.download.root.url=http://localhost/chromedriver -Dnpm.download.root.url=http://localhost/npm/ -Pdesktop -DskipJsDoc -DskipComponentCompile -DskipUnitTests -DrunIntTests -Dwebdriver.browser.type=GOOGLECHROME -Dwebdriver.chrome.nosandbox=true -Dwebdriver.reusebrowser=true -Dwebdriver.timeout=90 -Dwebdriver.timeout.getdriver=30 -DtestThreadCount=2" -DtestNameContains=jsmock || export status=$? || true
   chown -R $ORIG_UID:$ORIG_UID $(pwd)
   exit ${status:-0}
 # It is currently required that there be an empty line following the script: section
