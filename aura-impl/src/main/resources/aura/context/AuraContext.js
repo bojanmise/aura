@@ -35,6 +35,7 @@ Aura.Context.AuraContext = function AuraContext(config, initCallback) {
 
     this.fwuid = config["fwuid"];
     this.pathPrefix = config["pathPrefix"];
+    this.moduleServices = config["services"];
     this.num = 0;
 
     // To keep track of re-rendering service call
@@ -61,6 +62,7 @@ Aura.Context.AuraContext = function AuraContext(config, initCallback) {
     this.accessStack=[];
     this.tokens={};
     this.isModulesEnabled = !!config["m"];
+    this.moduleNamespaceAliases = config["mna"] || {};
 
     var that = this;
 
@@ -296,6 +298,7 @@ Aura.Context.AuraContext.prototype.merge = function(otherContext) {
     this.enableAccessChecks=otherContext["enableAccessChecks"];
     this.isLockerServiceEnabled = this["isLockerServiceEnabled"] = $A.lockerService.containerSupportsRequiredFeatures() && otherContext["lockerEnabled"];
     this.isModulesEnabled = !!otherContext["m"];
+    this.moduleServices = otherContext["services"];
 
     try {
         this.globalValueProviders.merge(otherContext["globalValueProviders"]);        
