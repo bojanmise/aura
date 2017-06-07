@@ -13,20 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.auraframework.service;
-
-import org.auraframework.util.json.Json;
-
-
-/**
- * <p>
- * Service for contacting other Aura servers
- * </p>
- * <p>
- * Instances of all AuraServices should be retrieved from {@link org.auraframework.Aura}
- * </p>
- */
-public interface MetricsService extends AuraService {
-	void serializeMetrics (Json json);
-	void serializeMetricsSummary (Json json);
-}
+({
+    init: function (component) {
+        var descriptor = component.get('v.descriptor');
+        var definition = $A.getDefinition(descriptor, function(foundDefinition){
+            if (foundDefinition){
+                $A.createComponent('auradocs:viewer', {descriptor: descriptor}, function(body, status) {
+                    if (status === "SUCCESS") {
+                        component.set('v.body', [body]);
+                    }
+                });
+            }
+        });
+    }
+});
