@@ -20,9 +20,10 @@ Aura.ExportsModule = {
         try {
             $A.eventService.newEvent(eventName).setParams(eventParams).fire();
         } finally {
-            context.releaseCurrentAccess();    
+            context.releaseCurrentAccess();
         }
     },
+
     "labels": function (obj) {
         return Object.keys(obj).reduce(function(r, cmpKey) {
             var key = obj[cmpKey];
