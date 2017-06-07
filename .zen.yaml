@@ -26,8 +26,8 @@ itest:
     aura:
       optional_history_file: null
       properties_name: aura.version
-  ftest_labels: [~ignore,aura.sanity,aura.precheckin,one.precheckin,precheckin,precheckin.phantomjs]
-  ab_enabled: true
+  ftest_labels: [~ignore,precheckin]
+  ab_enabled: false
 
 script:
   localedef -v -c -i en_US -f UTF-8 en_US.UTF-8

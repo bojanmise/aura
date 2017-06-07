@@ -143,6 +143,7 @@ function AuraClientService () {
     this.protocols={"layout":true};
     this.namespaces={internal:{},privileged:{}};
     this.lastSendTime = Date.now();
+    this.moduleServices = {};
 
     // TODO: @dval We should send this from the server, but for LightningOut apps is a non-trivial change,
     // so for the time being I hard-coded the resource path here to ensure we can lazy fetch them.
@@ -567,12 +568,76 @@ AuraClientService.prototype.throwExceptionEvent = function(resp) {
 
         evt.fire();
     } else {
-        try {
-            $A.util.json.decodeString(resp["defaultHandler"])(values);
-        } catch (e) {
-            throw new $A.auraError("Error in defaultHandler for event: " + descriptor, e, $A.severity.QUIET);
+        switch (descriptor) {
+            case "markup://aura:noAccess":
+            this.handleNoAccessException(values);
+            break;
+
+            case "markup://aura:clientOutOfSync":
+            this.handleClientOutOfSyncException();
+            break;
+
+            case "markup://aura:invalidSession":
+            this.handleInvalidSessionException(values);
+            break;
+
+            case "markup://aura:systemError":
+            this.handleSystemErrorException();
+            break;
+
+            default:
+            this.handleGenericEventException();
         }
     }
+};
+
+/**
+ * Handler for remote NoAccessException
+ */
+AuraClientService.prototype.handleNoAccessException = function(values) {
+    var redirectURL = values["redirectURL"];
+    if (redirectURL) {
+        window.location = redirectURL;
+    } else {
+        this.hardRefresh();
+    }
+};
+
+/**
+ * Handler for remote ClientOutOfSyncException
+ */
+AuraClientService.prototype.handleClientOutOfSyncException = function() {
+    this.setOutdated();
+};
+
+/**
+ * Handler for remote InvalidSessionException
+ */
+AuraClientService.prototype.handleInvalidSessionException = function(values) {
+    var newToken = values["newToken"];
+    try {
+        this.invalidSession(newToken);
+    } catch (e) {
+        window.location.reload(true);
+    }
+};
+
+/**
+ * Handler for remote SystemErrorException
+ */
+AuraClientService.prototype.handleSystemErrorException = function() {
+    var e = new Error('[SystemErrorException from server] unknown error');
+    e.reported=true;
+    throw e;
+};
+
+/**
+ * Handler for remote GenericEventException
+ */
+ AuraClientService.prototype.handleGenericEventException = function() {
+    var e = new Error('[GenericEventException from server] Unable to process event');
+    e.reported=true;
+    throw e;
 };
 
 AuraClientService.prototype.fireDoneWaiting = function() {
@@ -619,22 +684,12 @@ AuraClientService.prototype.initializeClientLibraries = function () {
  * @export
  */
 AuraClientService.prototype.loadClientLibrary = function(name, callback) {
-    var lib = this.clientLibraries[name.toLowerCase()];
+    name = name.toLowerCase();
+    var lib = this.clientLibraries[name];
     $A.assert(lib, 'ClientLibrary has not been registered');
 
     if (lib.loaded) {
         return callback();
-    }
-
-    lib.loading = lib.loading || [];
-    lib.loading.push($A.getCallback(callback));
-
-    function afterLoad() {
-        lib.loaded = true;
-        for (var i in lib.loading) {
-            lib.loading[i]();
-        }
-        lib.loading = [];
     }
 
     if (!lib.script) {
@@ -644,8 +699,30 @@ AuraClientService.prototype.loadClientLibrary = function(name, callback) {
         lib.script = script;
     }
 
+    lib.loading = lib.loading || [];
+    lib.loading.push($A.getCallback(callback));
+
+    function afterLoad() {
+        $A.metricsService.transactionEnd("aura", "performance:loadClientLibrary");
+
+        lib.loaded = true;
+
+        for (var i in lib.loading) {
+            lib.loading[i]();
+        }
+        lib.loading = [];
+    }
+
     lib.script.onload = afterLoad;
     lib.script.onerror = afterLoad;
+
+    $A.metricsService.transactionStart("aura", "performance:loadClientLibrary", {
+            "context": {
+                "attributes" : {
+                    "library": name
+                }
+            }
+        });
     lib.script.src = lib.script.getAttribute('data-src');
 };
 
@@ -2021,6 +2098,24 @@ AuraClientService.prototype.initializeApplication = function() {
         });
     });
 };
+/**
+ * Initializes injected services
+ *
+ * Initializes module services defined in the application
+ * @memberOf AuraClientService
+ * @private
+ */
+AuraClientService.prototype.initializeInjectedServices = function(services) {
+    if (services) {
+        services.forEach(function (serviceDefinition) {
+            var serviceRegistry = $A.clientService.moduleServices;
+            var serviceConstructor = $A.componentService.evaluateModuleDef(serviceDefinition);
+            var service = serviceConstructor($A, $A.componentService.moduleEngine);
+            $A.assert(service.name, 'Unknown service name');
+            serviceRegistry[service.name] = service;
+        });
+    }
+};
 
 /**
  * Check to see if we are inside the aura processing 'loop'.
@@ -3107,7 +3202,7 @@ AuraClientService.prototype.processSystemError = function(auraXHR) {
 };
 
 AuraClientService.prototype.processResponses = function(auraXHR, responseMessage) {
-
+    /// ******* The order of parameters to this method matter. They are used in overrides *******
     var action, actionResponses, response, dupes;
     var token = responseMessage["token"];
     if (token) {
@@ -3510,12 +3605,12 @@ AuraClientService.prototype.injectComponentAsync = function(config, locator, eve
                 callback(component);
             }
 
-            acs.renderInjection(component, locator, eventHandlers);     
+            acs.renderInjection(component, locator, eventHandlers);
         }, config, root, false, false, true);
     } finally {
         if (!priorAccess) {
             context.releaseCurrentAccess();
-        }        
+        }
     }
 
     // Now we go ahead and stick a label load on the request.
@@ -3833,7 +3928,7 @@ AuraClientService.prototype.allowAccess = function(definition, component) {
  * Saves the new token to storage then refreshes page.
  * @export
  */
-AuraClientService.prototype.invalidSession = function(token) {
+AuraClientService.prototype.invalidSession = function(newToken) {
     var acs = this;
 
     function refresh(disableParallelBootstrapLoad) {
@@ -3845,8 +3940,8 @@ AuraClientService.prototype.invalidSession = function(token) {
 
     // if new token provided then persist to storage and reload. if persisting
     // fails then we must go to the server for bootstrap.js to get a new token.
-    if (token && token["newToken"]) {
-        this._token = token["newToken"];
+    if (newToken) {
+        this._token = newToken;
         this.saveTokenToStorage()
             .then(refresh.bind(null, false), refresh.bind(null, true))
             .then(undefined, function(err) {
