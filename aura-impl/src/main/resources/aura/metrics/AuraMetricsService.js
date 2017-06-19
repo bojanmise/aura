@@ -881,6 +881,7 @@ Aura.Services.MetricsService.prototype.getBootstrapMetrics = function () {
     // allow non-numerics
     bootstrap["visibilityStateStart"] = Aura["bootstrap"]["visibilityStateStart"];
     bootstrap["modules"] = $A.getContext().isModulesEnabled;
+    bootstrap["mode"] = $A.getContext().getMode();
 
 
     bootstrap["pageStartTime"] = pageStartTime;
