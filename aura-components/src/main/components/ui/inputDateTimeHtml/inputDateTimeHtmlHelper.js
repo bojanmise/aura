@@ -14,25 +14,35 @@
  * limitations under the License.
  */
 ({
-    formatValue: function (component) {
+    formatValue: function (component, isConvertTime) {
         var value = component.get("v.value");
         var inputElement = component.find("inputDateTimeHtml").getElement();
-
+        
         if (!$A.util.isEmpty(value)) {
             var isoDate = $A.localizationService.parseDateTimeISO8601(value);
-            var timezone = component.get("v.timezone");
-
-            $A.localizationService.UTCToWallTime(isoDate, timezone, function (walltime) {
-                var walltimeISO = $A.localizationService.toISOString(walltime);
-
-                // datetime-local input doesn't support any time zone offset information,
-                // so we need to remove the 'Z' off of the end.
-                var displayValue = walltimeISO.split("Z", 1)[0] || walltimeISO;
-                inputElement.value = displayValue;
-            });
+            
+            if (isConvertTime) {
+                var timezone = component.get("v.timezone");
+                var that = this;
+                
+                $A.localizationService.UTCToWallTime(isoDate, timezone, function (walltime) {
+                    that.setInputValue(inputElement, walltime);
+                });
+            } else {
+                this.setInputValue(inputElement, isoDate);
+            }
         } else {
             inputElement.value = "";
         }
+    },
+    
+    setInputValue: function (elem, date) {
+        var isoString = $A.localizationService.toISOString(date);
+        
+        // datetime-local input doesn't support any time zone offset information,
+        // so we need to remove the 'Z' off of the end.
+        var displayValue = isoString.split("Z", 1)[0] || isoString;
+        elem.value = displayValue;
     },
 
     /**

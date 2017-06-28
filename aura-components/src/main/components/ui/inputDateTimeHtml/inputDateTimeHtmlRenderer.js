@@ -15,13 +15,15 @@
  */
 ({
     afterRender: function (component, helper) {
-        helper.formatValue(component);
+        helper.formatValue(component, true);
         this.superAfterRender();
     },
 
     rerender: function (component, helper) {
-        // If treating the value as local time, don't convert it to the user's timezone on rerender
         if (!component._considerLocalDateTime) {
+            // If treating the value as local time, don't convert it to the user's timezone on rerender
+            helper.formatValue(component, true);
+        } else {
             helper.formatValue(component);
         }
         this.superRerender();
