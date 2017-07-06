@@ -23,6 +23,7 @@
         testUtils.assertEquals("Warriors", objectParam["GoldenState"], "#1: Access in same locker: Failed to get expected value from Object.");
         testUtils.assertEquals("2017", objectParam["arrayEntry"][1], "#2: Access in same locker: Failed to get expected value from Object.");
 
+        var caller = args.cmpParam;
         var listParam = args.listParam;
         testUtils.assertEquals(5, listParam.length);
         testUtils.assertEquals(2, listParam[1], "#1: Access in non-locker: Failed to get expected value from List.");
@@ -41,7 +42,6 @@
         testUtils.assertEquals("green", setParam[4], "#2: Access in non-locker: Failed to get expected value from Set.");
         testUtils.assertEquals(caller, setParam[6], "#3: Access in same locker: Failed to get expected value from Set.");
 
-        var caller = args.cmpParam;
         testUtils.assertTrue(caller.toString().indexOf("SecureComponent") === -1, "Expected raw component in non-lockerized component.");
         testUtils.assertTrue(objectParam.arrayEntry[2].toString().indexOf("SecureComponent") === -1, "Expected raw component in non-lockerized component.");
         testUtils.assertTrue(listParam[4].toString().indexOf("SecureComponent") === -1, "Expected raw component in non-lockerized component.");

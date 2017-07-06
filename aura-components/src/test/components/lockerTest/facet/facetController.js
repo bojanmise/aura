@@ -34,6 +34,7 @@
         testUtils.assertEquals("Warriors", objectParam["GoldenState"], "#1: Access in same locker: Failed to get expected value from Object.");
         testUtils.assertEquals("2017", objectParam["arrayEntry"][1], "#2: Access in same locker: Failed to get expected value from Object.");
 
+        var caller = args.cmpParam;
         var listParam = args.listParam;
         testUtils.assertEquals(5, listParam.length);
         testUtils.assertEquals(2, listParam[1], "#1: Access in non-locker: Failed to get expected value from List.");
@@ -52,8 +53,7 @@
         testUtils.assertEquals("green", setParam[4], "#2: Access in non-locker: Failed to get expected value from Set.");
         testUtils.assertEquals(caller, setParam[6], "#3: Access in same locker: Failed to get expected value from Set.");
 
-        var caller = args.cmpParam;
-        testUtils.assertStartsWith("SecureComponent:", cmpParam.toString(), "Access in same locker: Expected component to be a SecureComponent.");
+        testUtils.assertStartsWith("SecureComponent:", caller.toString(), "Access in same locker: Expected component to be a SecureComponent.");
         testUtils.assertStartsWith("SecureComponent:", objectParam.arrayEntry[2].toString(), "Access in same locker: Expected SecureComponent in Object.");
         testUtils.assertStartsWith("SecureComponent:", listParam[4].toString(), "Access in same locker: Expected SecureComponent inside List.");
         testUtils.assertStartsWith("SecureComponent:", mapParam.c.toString(), "Access in same locker: Expected SecureComponent inside Map.");
