@@ -68,5 +68,17 @@
                 $A.test.assertEquals(expected, actual, errorMsg);
             }
         ]
+    },
+
+    testModuleAsLibrary: {
+        test: [
+            function(cmp) {
+                var simpleLib = cmp.find("simple-lib");
+                var method = simpleLib["log"];
+                var es = simpleLib["__esModule"]
+                $A.test.assertTrue({}.toString.call(method) === '[object Function]');
+                $A.test.assertTrue(es);
+            }
+        ]
     }
 })

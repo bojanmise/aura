@@ -91,7 +91,11 @@ ComponentClassRegistry.prototype.getComponentClass = function(descriptor, def) {
 };
 
 ComponentClassRegistry.prototype.buildInteropComponentClass = function(descriptor, def) {
-    var interopCmpClass = this.buildConstructor({ "interopClass" : def.interopClass }, def.interopClassName, Aura.Component.InteropComponent);
+    var interopClass = Aura.Component.InteropComponent;
+    if (Object.getPrototypeOf(def.interopClass) !== window["Engine"]["Element"]) {
+        interopClass = Aura.Component.InteropModule;
+    }
+    var interopCmpClass = this.buildConstructor({ "interopClass" : def.interopClass }, def.interopClassName, interopClass);
     this.classConstructors[descriptor] = interopCmpClass;
     return interopCmpClass;
 };
