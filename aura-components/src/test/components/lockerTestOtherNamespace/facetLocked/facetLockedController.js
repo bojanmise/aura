@@ -11,7 +11,6 @@
         var args = event.getParam("arguments");
         var testUtils = args.testUtils;
         
-        var caller = args.cmpParam;
         testUtils.assertEquals(true, args.booleanParam, "Access in different locker : Failed to get expected value from Boolean.");
         testUtils.assertEquals("1888-08-08", args.dateParam, "Access in different locker : Failed to get expected value from Date.");
         testUtils.assertEquals("1888-08-08T08:08:08.888Z", args.dateTimeParam, "Access in different locker : Failed to get expected value from DateTime.");
@@ -50,6 +49,7 @@
         testUtils.assertEquals("green", setParam[4], "#2: Access in non-locker: Failed to get expected value from Set.");
         testUtils.assertEquals(caller, setParam[6], "#3: Access in same locker: Failed to get expected value from Set.");
 
+        var caller = args.cmpParam;
         testUtils.assertStartsWith("SecureComponentRef:", caller.toString(), "Access in different locker : Expected component to be a SecureComponent.");
         testUtils.assertStartsWith("SecureComponentRef:", objectParam.arrayEntry[2].toString(), "Access in different locker : Expected SecureComponent in Object.");
         testUtils.assertStartsWith("SecureComponentRef:", listParam[4].toString(), "Access in different locker : Expected SecureComponent inside List.");

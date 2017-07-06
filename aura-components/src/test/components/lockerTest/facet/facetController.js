@@ -14,7 +14,6 @@
         var args = event.getParam("arguments");
         var testUtils = args.testUtils;
         
-        var caller = args.cmpParam;
         testUtils.assertEquals(true, args.booleanParam, "Access in same locker: Failed to get expected value from Boolean.");
         testUtils.assertEquals("1888-08-08", args.dateParam, "Access in same locker: Failed to get expected value from Date.");
         testUtils.assertEquals("1888-08-08T08:08:08.888Z", args.dateTimeParam, "Access in same locker: Failed to get expected value from DateTime.");
@@ -53,10 +52,11 @@
         testUtils.assertEquals("green", setParam[4], "#2: Access in non-locker: Failed to get expected value from Set.");
         testUtils.assertEquals(caller, setParam[6], "#3: Access in same locker: Failed to get expected value from Set.");
 
-        testUtils.assertStartsWith("SecureComponent:", args.cmpParam.toString(), "Access in same locker: Expected component to be a SecureComponent.");
-        testUtils.assertStartsWith("SecureComponent:", args.objectParam.arrayEntry[2].toString(), "Access in same locker: Expected SecureComponent in Object.");
-        testUtils.assertStartsWith("SecureComponent:", args.listParam[4].toString(), "Access in same locker: Expected SecureComponent inside List.");
-        testUtils.assertStartsWith("SecureComponent:", args.mapParam.c.toString(), "Access in same locker: Expected SecureComponent inside Map.");
+        var caller = args.cmpParam;
+        testUtils.assertStartsWith("SecureComponent:", cmpParam.toString(), "Access in same locker: Expected component to be a SecureComponent.");
+        testUtils.assertStartsWith("SecureComponent:", objectParam.arrayEntry[2].toString(), "Access in same locker: Expected SecureComponent in Object.");
+        testUtils.assertStartsWith("SecureComponent:", listParam[4].toString(), "Access in same locker: Expected SecureComponent inside List.");
+        testUtils.assertStartsWith("SecureComponent:", mapParam.c.toString(), "Access in same locker: Expected SecureComponent inside Map.");
         testUtils.assertStartsWith("SecureComponent:", setParam[6].toString(), "Access in different locker : Failed to get expected value from Set.");
         
         cmp.set("v.methodCalled", true);

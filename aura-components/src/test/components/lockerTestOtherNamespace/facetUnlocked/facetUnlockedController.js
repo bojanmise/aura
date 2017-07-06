@@ -11,7 +11,6 @@
         var args = event.getParam("arguments");
         var testUtils = args.testUtils;
         
-        var caller = args.cmpParam;
         testUtils.assertEquals(true, args.booleanParam, "Access to non-locker in different namespace: Failed to get expected value from Boolean.");
         testUtils.assertEquals("1888-08-08", args.dateParam, "Access to non-locker in different namespace: Failed to get expected value from Date.");
         testUtils.assertEquals("1888-08-08T08:08:08.888Z", args.dateTimeParam, "Access to non-locker in different namespace: Failed to get expected value from DateTime.");
@@ -50,6 +49,7 @@
         testUtils.assertEquals("green", setParam[4], "#2: Access in non-locker: Failed to get expected value from Set.");
         testUtils.assertEquals(caller, setParam[6], "#3: Access in same locker: Failed to get expected value from Set.");
 
+        var caller = args.cmpParam;
         testUtils.assertTrue(caller.toString().indexOf("SecureComponentRef") === -1, "Expected raw component in non-lockerized component.");
         testUtils.assertTrue(objectParam.arrayEntry[2].toString().indexOf("SecureComponentRef") === -1, "Expected raw component in non-lockerized component.");
         testUtils.assertTrue(listParam[4].toString().indexOf("SecureComponentRef") === -1, "Expected raw component in non-lockerized component.");
