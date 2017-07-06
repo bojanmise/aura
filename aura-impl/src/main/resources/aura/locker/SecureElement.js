@@ -260,7 +260,7 @@ function SecureElement(el, key) {
             SecureElementPrototype.prototype["tagName"] = tagName;
 
             var sep = new SecureElementPrototype();
-            sep.constructor = function() {throw new TypeError("Illegal constructor")};
+            sep.constructor = function() {throw new TypeError("Illegal constructor");};
             return sep;
         })();
 
