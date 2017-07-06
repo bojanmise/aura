@@ -1660,7 +1660,8 @@ function getUnfilteredTypes() {
                                "FormData",
                                "ValidityState",
                                "Crypto",
-                               "DOMTokenList"];
+                               "DOMTokenList",
+                               "ArrayBuffer"];
     unfilteredTypesMeta.forEach(function(unfilteredType){
         if (typeof window[unfilteredType] !== "undefined") {
             ret.push(window[unfilteredType]);
