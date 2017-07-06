@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.auraframework</groupId>
         <artifactId>aura-framework</artifactId>
-        <version>0.6000-SNAPSHOT</version>
+        <version>0.6000-77abfe7c69a9bfee4f0c2834b767ae41692173db</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
