@@ -181,6 +181,8 @@
     },
 
     testFailingDescriptorForErrorFromPromise: {
+        // unhandledrejection is only supported on chrome for now
+        browsers: ["GOOGLECHROME"],
         test: [
             function(cmp) {
                 $A.test.clickOrTouch(cmp.find("errorFromPromiseButton").getElement());
