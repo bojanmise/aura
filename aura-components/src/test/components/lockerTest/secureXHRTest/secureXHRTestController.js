@@ -33,5 +33,15 @@
         });
 
         testUtils.addWaitFor(true, function() { return cmp.get("v.completed") });
+    },
+ 
+    testResponseXML: function(cmp, event, helper) {
+        var testUtils = cmp.get("v.testUtils");
+
+        helper.testCallback(cmp, function(xhr, testUtils) {
+            xhr.onreadystatechange = helper.createXHRHandler(cmp, testUtils, true);
+        }, true);
+
+        testUtils.addWaitFor(true, function() { return cmp.get("v.completed") });
     }
 })
