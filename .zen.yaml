@@ -21,12 +21,12 @@ minimum_code_coverage_percentage: 0
 # Content between here and the end of the file, while it must be valid YAML,
 # is currently read textually by Zen. The order of the sections cannot change.
 itest:
-  codeline: 208_patch
+  codeline: 208_freeze
   modules:
     aura:
       optional_history_file: null
       properties_name: aura.version
-  ftest_labels: [~ignore,precheckin]
+  ftest_labels: [~ignore,aura.precheckin]
   ab_enabled: true
 
 script:
