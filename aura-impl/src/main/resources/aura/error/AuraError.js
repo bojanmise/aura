@@ -144,7 +144,6 @@ Aura.Errors.GenerateErrorId = function(hashGen) {
 };
 
 Aura.Errors.GenerateErrorIdHashGen = function(componentName, stackFrames) {
-    var isNonFrameworkStackFrame = false;
     var hashGen = componentName;
     for (var i = 0; i < stackFrames.length; i++) {
         var frame = stackFrames[i];
@@ -195,7 +194,7 @@ AuraError.prototype.findComponentFromStackTrace = function() {
     }
 
     return "";
-}
+};
 
 AuraError.prototype.setComponent = function(component) {
     this["component"] = component;

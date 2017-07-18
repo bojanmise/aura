@@ -56,6 +56,7 @@
      * Verify that failing descriptor gets reported for error through $A.error()
      */
     testFailingDescriptorForErrorViaAError: {
+        browsers: ["GOOGLECHROME"],
         test: [
             function(cmp) {
                 var iframeSrc = "/auratest/errorHandlingApp.app";
