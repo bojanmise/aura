@@ -553,6 +553,8 @@ AuraInstance.prototype.initConfig = function(config, useExisting, doNotInitializ
     this.clientService.setXHRExclusivity(config["XHRExclusivity"]);
     this.beforeInitHooks();
 
+    $A.executeExternalLibraries();
+
     if (!useExisting || $A.util.isUndefined($A.getContext())) {
         $A.clientService.initHost(config["host"], config["sid"]);
         // creating context.
@@ -570,7 +572,6 @@ AuraInstance.prototype.initConfig = function(config, useExisting, doNotInitializ
         $A.getContext()['merge'](config["context"]);
     }
 
-    $A.executeExternalLibraries();
 };
 
 /**
