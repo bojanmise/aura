@@ -20,12 +20,8 @@
     },
 
     rerender: function (component, helper) {
-        if (!component._considerLocalDateTime) {
-            // If treating the value as local time, don't convert it to the user's timezone on rerender
-            helper.formatValue(component, true);
-        } else {
-            helper.formatValue(component);
-        }
+        var convertTimezone = !component._considerLocalDateTime;
+        helper.formatValue(component, convertTimezone);
         this.superRerender();
     }
 });
