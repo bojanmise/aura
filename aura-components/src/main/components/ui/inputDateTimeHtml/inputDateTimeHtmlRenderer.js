@@ -15,13 +15,17 @@
  */
 ({
     afterRender: function (component, helper) {
-        helper.formatValue(component, true);
+        helper.formatValue(component);
         this.superAfterRender();
     },
 
     rerender: function (component, helper) {
-        var convertTimezone = !component._considerLocalDateTime;
-        helper.formatValue(component, convertTimezone);
+        if (!component._ignoreChange) {
+            helper.formatValue(component);
+        }
+
+        // reset the flag
+        component._ignoreChange = false;
         this.superRerender();
     }
 });

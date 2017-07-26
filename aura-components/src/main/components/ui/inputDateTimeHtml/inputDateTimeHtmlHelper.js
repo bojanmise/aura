@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 ({
-    formatValue: function (component, convertTimezone) {
+    formatValue: function (component) {
         var value = component.get("v.value");
         var timezone = component.get("v.timezone");
 
@@ -23,13 +23,9 @@
         if (!$A.util.isEmpty(value)) {
             var isoDate = $A.localizationService.parseDateTimeISO8601(value);
 
-            if (convertTimezone) {
-                $A.localizationService.UTCToWallTime(isoDate, timezone, function (walltime) {
-                    this.setInputValue(inputElement, walltime);
-                }.bind(this));
-            } else {
-                this.setInputValue(inputElement, isoDate);
-            }
+            $A.localizationService.UTCToWallTime(isoDate, timezone, function (walltime) {
+                this.setInputValue(inputElement, walltime);
+            }.bind(this));
         } else {
             inputElement.value = "";
         }
@@ -50,6 +46,12 @@
     doUpdate: function (component, value) {
         var timezone = component.get("v.timezone");
 
+        // When there is no initial value, consider the input as local date/time
+        // checking here instead of init because v.value could be set later, e.g. in a callback
+        if ($A.util.isUndefined(component._considerLocalDateTime)) {
+            component._considerLocalDateTime = $A.util.isEmpty(component.get("v.value"));
+        }
+
         if (component._considerLocalDateTime) {
             // When v.value is empty and the new value is 2017-04-12T01:00, we use parseDateTime method that will parse
             // it in local time. When toISOString is called, it will take into account the timezone offset and return a
@@ -65,7 +67,7 @@
     },
 
     setValue: function (component, value) {
-        component.set("v.value", $A.localizationService.toISOString(value), true);
-        component._considerLocalDateTime = false;
+        component.set("v.value", $A.localizationService.toISOString(value));
+        component._ignoreChange = true;
     }
 });
