@@ -189,8 +189,8 @@
                 this.waitForErrorModal();
             },
             function(cmp) {
-                var actual = this.findFailingDescriptorFromErrorModal();
-                var expected = "markup://auratest:errorHandlingApp";
+                var actual = this.findStacktraceFromErrorModal();
+                var expected = "throwErrorFromPromise()";
 
                 $A.test.assertTrue(actual.indexOf(expected) > -1);
             }

@@ -867,16 +867,6 @@ AuraInstance.prototype.reportError = function(message, error) {
         ((this.lastKnownError && message && message.indexOf(this.lastKnownError.message) > -1) ? this.lastKnownError : null) ||
         new $A.auraError("[NoErrorObjectAvailable] " + message);
 
-    // wrapping non aura error, so that required info can be set to the error
-    if (!(error instanceof $A.auraError)) {
-        error = new $A.auraError(null, error);
-    }
-
-    if (!error["component"]) {
-        var component = error.findComponentFromStackTrace();
-        error.setComponent(component);
-    }
-
     $A.handleError(message, error);
 
     this.lastKnownError = null;
