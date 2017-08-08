@@ -316,9 +316,9 @@
                 var itemList = this.iters;
 
                 this.highlightedIndex++;
-
-                this.traversalCount++; // ++ before the check to loop only num of items-1 times
-                if (this.traversalCount < itemList.length && this.highlightedIndex !== this.originalIndex) { 
+                // loop # of items(other items + wrap around to itself) + 1(wrap around) times
+                if (this.traversalCount < itemList.length + 1) {
+                    this.traversalCount++;
                     // reached bottom
                     if (this.highlightedIndex >= itemList.length) {
                         this.highlightedIndex = -1;
@@ -344,8 +344,9 @@
                 }
                 this.highlightedIndex--;
 
-                this.traversalCount++; // ++ before the check to loop only num of items-1 times
-                if (this.traversalCount < itemList.length && this.highlightedIndex !== this.originalIndex) {
+                // loop # of items(other items + wrap around to itself) + 1(wrap around) times
+                if (this.traversalCount < itemList.length + 1) {
+                    this.traversalCount++;
                     // reached top
                     if (this.highlightedIndex < 0) {
                         this.highlightedIndex = -1;
@@ -377,11 +378,14 @@
                 if (this.highlightedIndex < 0 || this.highlightedIndex >= this.iters.length) {
                     return; // nothing selected
                 }
-                var highlightedCmp = this.iters[this.highlightedIndex];
-                highlightedCmp.set("v.highlighted", true);
-                var highlightedElement = highlightedCmp.getElement();
-                self.scrollIntoViewIfNeeded(highlightedElement);
-                self.updateAriaAttributes(cmp, highlightedCmp);
+                if(this.originalIndex !== this.highlightedIndex) {
+                    var highlightedCmp = this.iters[this.highlightedIndex];
+                    highlightedCmp.set("v.highlighted", true);
+                    var highlightedElement = highlightedCmp.getElement();
+                    self.scrollIntoViewIfNeeded(highlightedElement);
+                    self.updateAriaAttributes(cmp, highlightedCmp);
+                }
+                
             }
 
         };
