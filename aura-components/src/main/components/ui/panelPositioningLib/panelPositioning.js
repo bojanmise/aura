@@ -188,8 +188,11 @@ function lib(constraint, elementProxyFactory, utils, win) { //eslint-disable-lin
             var observer;
             var proxyWheelEvents = true;
             var domHandle = config.element;
-            var scrollableParent = utils.getScrollableParent(config.target, w);
-
+            var scrollableParent = utils.getScrollableParent(
+                // W-4180706 trigger panel inside text area, then textarea could set overflow-y to auto.
+                // Avoid text area to be used as scrollable parent.
+                config.target.tagName === "TEXTAREA" ? config.target.parentNode : config.target, 
+                w);
 
             // This observer and the test for scrolling children 
             // is so that if a panel contains a scrol we do not 
@@ -197,7 +200,6 @@ function lib(constraint, elementProxyFactory, utils, win) { //eslint-disable-lin
             if (w.MutationObserver) { // phantomjs :(
 
                 var scrollableChildren = domHandle.querySelectorAll('[data-scoped-scroll="true"]');
-
 
                 observer = new MutationObserver(function () {
                     scrollableChildren = domHandle.querySelectorAll('[data-scoped-scroll="true"]');
@@ -210,14 +212,12 @@ function lib(constraint, elementProxyFactory, utils, win) { //eslint-disable-lin
                     proxyWheelEvents = false;
                 }
 
-
                 observer.observe(domHandle, {
                     attributes: true,
                     subtree: true,
                     childList: true
                 });
             }
-
 
             if (scrollableParent) {
                 // because this always uses the same listener function
@@ -250,7 +250,6 @@ function lib(constraint, elementProxyFactory, utils, win) { //eslint-disable-lin
             if (!config.type && config.targetAlign) {
                 $A.assert(!!config.targetAlign.match(ALIGN_REGEX), 'Invalid targetAlign string');
             }
-
 
             config.element = elementProxyFactory.getElement(config.element);
             config.target = elementProxyFactory.getElement(config.target);
