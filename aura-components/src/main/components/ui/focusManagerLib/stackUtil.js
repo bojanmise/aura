@@ -94,16 +94,19 @@ function lib(focusUtil) { //eslint-disable-line no-unused-vars
         var selector = [];
         while (element && element.nodeType === Node.ELEMENT_NODE) {
             var path = element.nodeName.toLowerCase();
-                var sibling = element, index = 1;
-                while ((sibling = sibling.previousElementSibling)) {
-                    if (sibling.nodeName.toLowerCase() === path) {
-                        index++;
-                    }
+            var sibling = element, index = 1;
+            while ((sibling = sibling.previousElementSibling)) {
+                if (sibling.nodeName.toLowerCase() === path) {
+                    index++;
                 }
-                if (index !== 1) {
-                    path += ":nth-of-type("+index+")";
-                }
-            selector.unshift(path + (element.className ? '.' + $A.util.trim(element.className).replace(/\s+/g, ".") : ''));
+            }
+            if (index !== 1) {
+                path += ":nth-of-type("+index+")";
+            }
+            // On IE11, when the element is SVG,  then it will result element.className return
+            // SVGAnimatedString not String. 
+            var className = element.getAttribute('class');
+            selector.unshift(path + (className ? '.' + $A.util.trim(className).replace(/\s+/g, ".") : ''));
             element = element.parentNode;
         }
         return selector.join(" > ");
