@@ -112,7 +112,7 @@ function lib(focusUtil) { //eslint-disable-line no-unused-vars
             if (index !== 1) {
                 path += ":nth-of-type("+index+")";
             }
-            selector.unshift(path + sanitizeClassName(element.className));
+            selector.unshift(path + sanitizeClassName(element.getAttribute('class')));
             element = element.parentNode;
         }
         return selector.join(" > ");
