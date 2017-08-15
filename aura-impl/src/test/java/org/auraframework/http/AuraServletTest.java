@@ -15,6 +15,11 @@
  */
 package org.auraframework.http;
 
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.auraframework.AuraConfiguration;
@@ -24,6 +29,7 @@ import org.auraframework.def.ActionDef;
 import org.auraframework.def.ApplicationDef;
 import org.auraframework.def.DefDescriptor;
 import org.auraframework.instance.Action;
+import org.auraframework.instance.AuraValueProviderType;
 import org.auraframework.service.ContextService;
 import org.auraframework.service.DefinitionService;
 import org.auraframework.service.SerializationService;
@@ -50,11 +56,8 @@ import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import test.org.auraframework.impl.adapter.ConfigAdapterImpl;
 
-import javax.inject.Inject;
-import java.util.Arrays;
-import java.util.List;
+import test.org.auraframework.impl.adapter.ConfigAdapterImpl;
 
 public class AuraServletTest extends UnitTestCase {
 
@@ -570,6 +573,8 @@ public class AuraServletTest extends UnitTestCase {
 
         // Assert
         Mockito.verify(serverService).run(Mockito.same(message), Mockito.any(), Mockito.any(), Mockito.any());
+        assertFalse("Publicly cached action should not have Browser GVP in the context.", 
+                context.getGlobalProviders().containsKey(AuraValueProviderType.BROWSER.getPrefix()));
     }
     
     @Test
