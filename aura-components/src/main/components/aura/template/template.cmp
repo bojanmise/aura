@@ -252,14 +252,6 @@
 
     {!v.bootstrapInlineJs}
 
-    try{
-        var auraCss = document.getElementsByClassName('auraCss');
-        var current;
-        for (var i=auraCss.length-1; i >= 0; i--) {
-          current = auraCss[i];
-          current.href = current.getAttribute("data-href");
-        }
-    } catch(e){}
 }());
 
     </script>

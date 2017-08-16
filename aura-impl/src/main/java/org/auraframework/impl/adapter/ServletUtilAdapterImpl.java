@@ -19,7 +19,6 @@ package org.auraframework.impl.adapter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -443,11 +442,6 @@ public class ServletUtilAdapterImpl implements ServletUtilAdapter {
     public List <String> getJsPrefetchUrls(AuraContext context) throws QuickFixException {
         return getClientLibraryJSPrefetchUrls(context);
     }
-    
-	@Override
-	public List<String> getCssPreloadUrls(AuraContext context) throws QuickFixException {
-		return Arrays.asList(this.getAppCssUrl(context));
-	}
     
 	@Override
 	public List<String> getJsPreloadUrls(AuraContext context) throws QuickFixException {
@@ -1087,6 +1081,5 @@ public class ServletUtilAdapterImpl implements ServletUtilAdapter {
     }
 
     private static final String SAFE_EVAL_HTML_URI = "/lockerservice/safeEval.html";
-
 
 }

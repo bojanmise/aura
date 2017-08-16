@@ -620,10 +620,8 @@ public class ServerServiceImpl implements ServerService {
 
         StringBuilder sb = new StringBuilder();
 
-        templateUtil.writePrefetchScriptTags(servletUtilAdapter.getJsPrefetchUrls(context), sb);
-        templateUtil.writePreloadLinkTags(servletUtilAdapter.getCssPreloadUrls(context), sb);
         templateUtil.writePreloadScriptTags(servletUtilAdapter.getJsPreloadUrls(context), sb);
-        
+        templateUtil.writePrefetchScriptTags(servletUtilAdapter.getJsPrefetchUrls(context), sb);
         attributes.put("prefetchTags", sb.toString());
         sb.setLength(0);
 
@@ -636,15 +634,14 @@ public class ServerServiceImpl implements ServerService {
         attributes.put("auraResetTags", sb.toString());
         sb.setLength(0);
 
-        //StringBuilder styleTagStringBuilder = new StringBuilder();
-        templateUtil.writeHtmlDataHrefStyles(servletUtilAdapter.getStyles(context), "auraCss", sb);
-        attributes.put("auraStyleTags", sb.toString());
-        sb.setLength(0);
-        
+        StringBuilder styleTagStringBuilder = new StringBuilder();
+        templateUtil.writeHtmlStyles(servletUtilAdapter.getStyles(context), "auraCss", styleTagStringBuilder);
+
         if (mode.allowLocalRendering() && value.isLocallyRenderable()) {
 
             BaseComponent<?, ?> cmp = (BaseComponent<?, ?>) instanceService.getInstance(value, componentAttributes);
 
+            attributes.put("auraStyleTags", styleTagStringBuilder.toString());
             attributes.put("body", Lists.<BaseComponent<?, ?>> newArrayList(cmp));
             attributes.put("bodyClass", "");
             attributes.put("defaultBodyClass", "");
@@ -654,7 +651,7 @@ public class ServerServiceImpl implements ServerService {
                 attributes.put("manifest", servletUtilAdapter.getManifestUrl(context, componentAttributes));
             }
 
-            servletUtilAdapter.writeScriptUrls(context, value, componentAttributes, sb, null);
+            servletUtilAdapter.writeScriptUrls(context, value, componentAttributes, sb, styleTagStringBuilder.toString());
 
             attributes.put("auraNamespacesScriptTags", sb.toString());
 

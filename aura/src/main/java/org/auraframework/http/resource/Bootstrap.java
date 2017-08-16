@@ -61,17 +61,17 @@ public class Bootstrap extends AuraResourceImpl {
 
             // css files need to live in the head, since aura will append styles to the head for tokens
             // this ensures order is preserved as they appear, while handling that a dom list is mutated as nodes are moved
-//            "    try{\n" +
-//            "        var cssInBody = document.body.getElementsByClassName('auraCss');\n" +
-//            "        var lastNode = null;\n" +
-//            "        for (var i=cssInBody.length-1; i >= 0; i--) {\n" +
-//            "            if (lastNode) {\n" +
-//            "                lastNode = document.head.insertBefore(cssInBody[i], lastNode)" +
-//            "            } else {\n" +
-//            "                lastNode = document.head.appendChild(cssInBody[i]);\n" +
-//            "            }\n" +
-//            "        }\n" +
-//            "    } catch(e){}\n" +
+            "    try{\n" +
+            "        var cssInBody = document.body.getElementsByClassName('auraCss');\n" +
+            "        var lastNode = null;\n" +
+            "        for (var i=cssInBody.length-1; i >= 0; i--) {\n" +
+            "            if (lastNode) {\n" +
+            "                lastNode = document.head.insertBefore(cssInBody[i], lastNode)" +
+            "            } else {\n" +
+            "                lastNode = document.head.appendChild(cssInBody[i]);\n" +
+            "            }\n" +
+            "        }\n" +
+            "    } catch(e){}\n" +
             "    if (window.Aura.afterBootstrapReady && window.Aura.afterBootstrapReady.length) {\n" +
             "        var queue = window.Aura.afterBootstrapReady;\n" +
             "        window.Aura.afterBootstrapReady = [];\n" +
