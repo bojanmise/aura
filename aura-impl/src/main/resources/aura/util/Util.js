@@ -1012,7 +1012,9 @@ Aura.Utils.Util.prototype.removeElement = function(element) {
 
     // Out early for custom elements
     if (element.__customElement) {
-        element.parentElement.removeChild(element);
+        if (element.parentElement) {
+            element.parentElement.removeChild(element);
+        }
         return;
     }
 
