@@ -294,7 +294,7 @@ ClassList.prototype = {
                 // this is not only an optimization, it is also needed to avoid adding the same
                 // class twice when the initial diffing algo kicks in without an old vm to track
                 // what was already added to the DOM.
-                if (vm.idx) {
+                if (vm.idx || vm.vnode.isRoot) {
                     // we intentionally make a sync mutation here and also keep track of the mutation
                     // for a possible rehydration later on without having to rehydrate just now.
                     elm.classList.add(className);
@@ -304,7 +304,7 @@ ClassList.prototype = {
     },
     remove: function () {
         var vm = this[ViewModelReflection];
-        var cmpClasses = vm.cmpClasses;
+        var cmpClasses = vm.cmpClasses, vnode = vm.vnode;
         var elm = getLinkedElement$1(this);
         // Remove specified class values.
         forEach.call(arguments, function (className) {
@@ -314,10 +314,10 @@ ClassList.prototype = {
                 // this is not only an optimization, it is also needed to avoid removing the same
                 // class twice when the initial diffing algo kicks in without an old vm to track
                 // what was already added to the DOM.
-                if (vm.idx) {
+                if (vm.idx || vnode.isRoot) {
                     // we intentionally make a sync mutation here when needed and also keep track of the mutation
                     // for a possible rehydration later on without having to rehydrate just now.
-                    var ownerClass = vm.vnode.data.class;
+                    var ownerClass = vnode.data.class;
                     // This is only needed if the owner is not forcing that class to be present in case of conflicts.
                     if (isUndefined(ownerClass) || !ownerClass[className]) {
                         elm.classList.remove(className);
@@ -3496,4 +3496,4 @@ exports.unwrap = unwrap;
 Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-/** version: 0.13.3 */
+/** version: 0.13.5 */
