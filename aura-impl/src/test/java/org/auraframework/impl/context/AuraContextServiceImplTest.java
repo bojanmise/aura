@@ -25,6 +25,7 @@ import org.auraframework.system.AuraContext.GlobalValue;
 import org.auraframework.system.AuraContext.Mode;
 import org.auraframework.throwable.AuraRuntimeException;
 import org.auraframework.util.test.util.AuraPrivateAccessor;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -71,6 +72,7 @@ public class AuraContextServiceImplTest extends AuraImplTestCase {
     	contextServiceMocked.endContext();
     }
 
+    @Ignore
     @Test
     public void testTestContext() {
         // can only test the test context
@@ -92,6 +94,7 @@ public class AuraContextServiceImplTest extends AuraImplTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testGetAllowedGlobals() {
         final String name = getName();
@@ -123,6 +126,7 @@ public class AuraContextServiceImplTest extends AuraImplTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testRegisterGlobalWithNullName() {
         try {
@@ -134,6 +138,7 @@ public class AuraContextServiceImplTest extends AuraImplTestCase {
         }
     }
 
+    @Ignore
     @Test
     public void testRegisterGlobalDuplicate() {
         final String name = getName();
