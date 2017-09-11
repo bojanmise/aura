@@ -801,26 +801,16 @@ AuraClientService.prototype.isDisconnectedOrCancelled = function(response) {
 AuraClientService.prototype.singleAction = function(action, actionResponse) {
     var needUpdate, needsRefresh;
 
-    try {
-        // Force the transaction id to 'this' action, so that we maintain chains.
-        needUpdate = action.updateFromResponse(actionResponse);
-        needsRefresh = action.isRefreshAction();
+    // Force the transaction id to 'this' action, so that we maintain chains.
+    needUpdate = action.updateFromResponse(actionResponse);
+    needsRefresh = action.isRefreshAction();
 
-        if (!action.abortIfComponentInvalid(false)) {
-            if (needUpdate) {
-                action.finishAction($A.getContext());
-            }
-            if (needsRefresh) {
-                action.fireRefreshEvent("refreshEnd", needUpdate);
-            }
+    if (!action.abortIfComponentInvalid(false)) {
+        if (needUpdate) {
+            action.finishAction($A.getContext());
         }
-    } catch (e) {
-        if (e instanceof $A.auraError) {
-            throw e;
-        } else {
-            var wrapper = new $A.auraError(null, e);
-            wrapper.action = action;
-            throw wrapper;
+        if (needsRefresh) {
+            action.fireRefreshEvent("refreshEnd", needUpdate);
         }
     }
 };
@@ -2427,9 +2417,10 @@ AuraClientService.prototype.persistStorableActions = function(actions) {
             try {
                 key = action.getStorageKey();
             } catch (e) {
-                var errorWrapper = new $A.auraError(null, e);
-                errorWrapper.action = action;
-                $A.logger.reportError(errorWrapper);
+                var message = "AuraClientService.persistStorableActions(): Failed to get action storage key";
+                var auraError = new $A.auraError(message, e);
+                $A.logger.reportError(auraError, action);
+                continue;
             }
 
             doStore = true;
@@ -2489,9 +2480,8 @@ AuraClientService.prototype.executeStoredAction = function(action, response, col
             }
         }
     } catch (e) {
-        var errorWrapper = new $A.auraError(null, e);
-        errorWrapper.action = action;
-        $A.logger.reportError(errorWrapper);
+        var auraError = new $A.auraError("AuraClientService.executeStoredAction(): error happened when processing stored action", e);
+        $A.logger.reportError(auraError, action);
     } finally {
         this.clearInCollection();
     }
@@ -3201,7 +3191,21 @@ AuraClientService.prototype.receive = function(auraXHR, timedOut) {
         }
         this.fireDoneWaiting();
     } catch (e) {
-        throw (e instanceof $A.auraError) ? e : new $A.auraError("AuraClientService.receive action callback failed", e);
+        if (e instanceof $A.auraError) {
+            if (e.action) {
+                var failingCmp = e.action.getComponent();
+                if (failingCmp) {
+                    // if error has action, using the component associated with the action
+                    var descriptor = failingCmp.getDef().getDescriptor().toString();
+                    e.setComponent(descriptor);
+                }
+            }
+            throw e;
+        }
+
+        // There might be some handling gap here. We may need action info to report error correctly.
+        throw new $A.auraError("AuraClientService.receive action callback failed", e);
+
     } finally {
         this.auraStack.pop();
         this.releaseXHR(auraXHR);
@@ -3226,7 +3230,19 @@ AuraClientService.prototype.processErrors = function(auraXHR, errorMessage) {
             action = actions[id];
             var error = new Error(errorMessage);
             $A.warning("Error in the server action response:" + errorMessage);
-            action.markError($A.getContext(), [error]);
+
+            try {
+                action.markError($A.getContext(), [error]);
+            } catch (e) {
+                if (e instanceof $A.auraError) {
+                    throw e;
+                }
+
+                // if callback is not in aura loop, non AuraError gets caught
+                var auraError = new $A.auraError("Error happened when processing action errors", e);
+                auraError.action = action;
+                throw auraError;
+            }
         }
     }
 };
@@ -3333,11 +3349,12 @@ AuraClientService.prototype.processResponses = function(auraXHR, responseMessage
         } catch (e) {
             if (e instanceof $A.auraError) {
                 throw e;
-            } else {
-                var errorWrapper = new $A.auraError("Error processing action response", e);
-                errorWrapper.action = action;
-                throw errorWrapper;
             }
+
+            // if callback is not in aura loop, non AuraError gets caught
+            var auraError = new $A.auraError("Error happened when processing action responses", e);
+            auraError.action = action;
+            throw auraError;
         }
     }
 
@@ -3377,14 +3394,25 @@ AuraClientService.prototype.processIncompletes = function(auraXHR) {
 
     for (id in actions) {
         if (actions.hasOwnProperty(id)) {
-            action = actions[id];
-            action.incomplete($A.getContext());
-            key = this.actionStoreMap[action.getId()];
-            dupes = this.getAndClearDupes(key);
-            if (dupes) {
-                for (var i = 0; i < dupes.length; i++) {
-                    dupes[i].incomplete($A.getContext());
+            try {
+                action = actions[id];
+                action.incomplete($A.getContext());
+                key = this.actionStoreMap[action.getId()];
+                dupes = this.getAndClearDupes(key);
+                if (dupes) {
+                    for (var i = 0; i < dupes.length; i++) {
+                        dupes[i].incomplete($A.getContext());
+                    }
                 }
+            } catch (e) {
+                if (e instanceof $A.auraError) {
+                    throw e;
+                }
+
+                // if callback is not in aura loop, non AuraError gets caught
+                var auraError = new $A.auraError("Error happened when processing incompleted actions", e);
+                auraError.action = action;
+                throw auraError;
             }
         }
     }
