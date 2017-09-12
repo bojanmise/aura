@@ -173,7 +173,7 @@ Logger.prototype.reportError = function(e, action, foreground){
         "clientError": e.toString(),
         // Note that stack is non-standard, and even if present, may be obfuscated
         // Also we only take the first 25k characters because stacks can get very large
-        // and our parser on the server will gack on more than a million characters 
+        // and our parser on the server will gack on more than a million characters
         // for the entire json package.
         "clientStack": (e.stackTrace || e.stack || "").toString().substr(0, Aura.Utils.Logger.MAX_STACKTRACE_SIZE),
         "componentStack": e["componentStack"] || "",
@@ -193,29 +193,38 @@ Logger.prototype.isExternalError = function(e) {
     }
 
     var errorframes;
-    var count = 0;
     if (e instanceof $A.auraError) {
         errorframes = e.stackFrames;
     } else {
         errorframes = Aura.Errors.StackParser.parse(e);
     }
 
-    errorframes.forEach(function(errorframe) {
-        var fileName = errorframe.fileName;
-        if (fileName &&
-            fileName.match(/aura_[^\.]+\.js$/gi) === null && // not from aura
-            fileName.match("engine.js") === null &&          // not from module engine
-            fileName.match("engine.min.js") === null &&      // not from module engine PROD
-            fileName.indexOf('/components/') === -1 &&       // not from components
-            fileName.indexOf('/libraries/') === -1 &&        // not from libraries
-            fileName.match("appcore.js") === null &&         // not from appcore.js
-            fileName.match("app.js") === null) {             // not from app.js
-            count += 1;
+    for (var i = 0, len = errorframes.length; i < len; i++) {
+        var fileName = errorframes[i].fileName;
+        if (!fileName) {
+            continue;
         }
-    });
 
-    // external means every stackframe isn't from framework nor framework consumers
-    return errorframes.length === count;
+        // if the error is raised from chrome extension code
+        if (i === 0 && fileName.indexOf("chrome-extension://") > -1) {
+            return true;
+        }
+
+        // external means every stackframe isn't from framework nor framework consumers
+        if (fileName.match(/aura_[^\.]+\.js$/gi) ||         // includes aura
+            fileName.match("engine.js") ||                  // includes module engine
+            fileName.match("engine.min.js") ||              // includes module engine PROD
+            fileName.indexOf('/components/') > -1  ||       // includes components
+            fileName.indexOf('/libraries/') > -1 ||         // includes libraries
+            fileName.indexOf('/jslibrary/') > -1 ||         // includes client libraries
+            fileName.indexOf('/auraFW/resources/') > -1 ||  // includes client libraries
+            fileName.match("appcore.js") ||                 // includes appcore.js
+            fileName.match("app.js")) {                     // includes app.js
+            return false;
+        }
+    }
+
+    return true;
 };
 
 /**
@@ -463,7 +472,7 @@ Logger.prototype.devDebugConsoleLog = function(level, message, error) {
             }
             if (trace) {
                 console["group"]("stack");
-                for ( var i = 0; i < trace.length; i++) {
+                for (var i = 0; i < trace.length; i++) {
                     console["debug"](trace[i]);
                 }
                 console["groupEnd"]();
