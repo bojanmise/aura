@@ -1,10 +1,8 @@
 <aura:component>
     <aura:attribute name="bool" type="Boolean" default="false"/>
     <aura:attribute name="items" type="List" default="[]"/>
-    <aura:attribute name="accessorValue" type="String" default="some ignored value"/>
 
-    <moduleTest:simpleCmp aura:id="main" literal="{!v.bool}" myAccessor="{!v.accessorValue}" />
-    <moduleTest:simpleCmp aura:id="accessor-primitive-value" myAccessor="some-value-to-be-ignored" />
+    <moduleTest:simpleCmp aura:id="main" literal="{!v.bool}" />
 
     <moduleTest:list aura:id="list" items="{!v.items}" />
     <moduleTest:list aura:id="list-without-items" />

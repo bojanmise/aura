@@ -11,15 +11,8 @@ export default class Simple extends Element {
     @api callbackaction;
     @api nested = "Default nested";
     @api date;
-    state = {
-        accessorValue: 'accessor-test-value'
-    };
 
     static publicMethods = ['test'];
-
-    @api get myAccessor() {
-        return this.state.accessorValue;
-    }
 
     handleFireAction() {
         if (this.callbackaction) {
@@ -39,16 +32,5 @@ export default class Simple extends Element {
 
     test() {
         return 'Test method!';
-    }
-
-    handleClick() {
-        this.state.accessorValue = 'modified-accessor-value';
-
-        this.dispatchEvent(new CustomEvent('change', {
-            bubbles: true,
-            detail : {
-                myAccessor: this.myAccessor
-            }
-        }));
     }
 }

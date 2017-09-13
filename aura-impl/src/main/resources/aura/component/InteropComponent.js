@@ -197,10 +197,6 @@ InteropComponent.prototype.setupMethods = function () {
     });
 };
 
-InteropComponent.prototype.isReadOnlyProperty = function (propName) {
-    return this.interopDef['props'][propName]['config'] === 1;
-};
-
 /**
  * Function called when an attribute changed in Aura land
  * @param key - { String }
@@ -214,7 +210,7 @@ InteropComponent.prototype.attributeChange = function (key, value) {
         // we should first ask about propName, usually we have aura versions using a global attr, like style.
         if (!propName && this.isHtmlGlobalAttr(key)) {
             this.setGlobalAttribute(element, key, value);
-        } else if (!this.isReadOnlyProperty(propName)) {
+        } else {
             element[propName] =  value;
         }
     }
@@ -337,31 +333,6 @@ InteropComponent.prototype.get = function (key) {
 };
 
 /**
- * Sets a value for an attribute without validation.
- *
- * @private
- *
- * @param attrName
- * @param value
- */
-InteropComponent.prototype._setAttrValue = function (attrName, value) {
-    var attrValue = this.attributes[attrName];
-
-    if (attrValue && $A.util.isExpression(attrValue.value)) {
-        $A.warning('Component ' + this.componentDef.interopClassName
-            + ' is not the owner of property "' + attrName
-            + '" and should not change it directly'
-        );
-        attrValue.value.set(value);
-    } else if (attrValue && attrValue.getExpression) { // PRV
-        attrValue.set(value);
-    } else { // set in case attribute was not explicitly set in markup
-        this.attributes[attrName] = value;
-        this.attributeChange(attrName, value);
-    }
-};
-
-/**
  * @public
  * @export
  */
@@ -374,11 +345,20 @@ InteropComponent.prototype.set = function (key, value) {
     $A.assert(path.length === 1, 'This component does not allow set on nested properties');
 
     var expr = path.join('.');
-    var propName = this.attrNameToPropMap[expr];
+    var attrValue = this.attributes[expr];
 
-    $A.assert(!propName || !this.isReadOnlyProperty(propName), "Attribute '" + expr + "' is getter only and can't be initialized from owner");
-
-    this._setAttrValue(expr, value);
+    if (attrValue && $A.util.isExpression(attrValue.value)) {
+        $A.warning('Component ' + this.componentDef.interopClassName
+            + ' is not the owner of property "' + expr
+            + '" and should not change it directly'
+        );
+        attrValue.value.set(value);
+    } else if (attrValue && attrValue.getExpression) { // PRV
+        attrValue.set(value);
+    } else { // set in case attribute was not explicitly set in markup
+        this.attributes[expr] = value;
+        this.attributeChange(expr, value);
+    }
 };
 
 InteropComponent.prototype.attachOnChangeToElement = function (element) {
@@ -388,10 +368,7 @@ InteropComponent.prototype.attachOnChangeToElement = function (element) {
         if (detail && event.target === element) {
             Object.keys(detail).forEach(function (propName) {
                 var attrName = self.propNameToAttrMap[propName];
-
-                if (self.isReadOnlyProperty(propName)) { // is public accessor.
-                    self._setAttrValue(attrName, detail[propName]);
-                } else if (self.attributes[attrName]) {
+                if (self.attributes[attrName]) {
                     self.set('v.' + attrName, detail[propName]);
                 }
             });
@@ -420,19 +397,13 @@ InteropComponent.prototype.render = function () {
             element.addEventListener(attrName.substring(2), value, false);
         } else if (!propName && this.isHtmlGlobalAttr(attrName)) { // first check we are not overriding this attrName
             this.setGlobalAttribute(element, attrName, value);
-        } else if (!cmp.isReadOnlyProperty(propName)) {
+        } else {
             if (value !== undefined) {
                 element[propName] = value;
             }
         }
     }.bind(this));
 
-    // Set public accessors in attribute bag so aura land can get it.
-    Object.keys(this.interopDef['props']).forEach(function (propName) {
-        if (cmp.isReadOnlyProperty(propName)) {
-            cmp._setAttrValue(cmp.propNameToAttrMap[propName], element[propName]);
-        }
-    });
 
     return [element];
 };
