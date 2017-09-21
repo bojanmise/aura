@@ -58,6 +58,7 @@ import org.auraframework.impl.type.AuraStaticTypeDefRegistry;
 import org.auraframework.service.CachingService;
 import org.auraframework.service.CompilerService;
 import org.auraframework.service.DefinitionService;
+import org.auraframework.service.LoggingService;
 import org.auraframework.service.RegistryService;
 import org.auraframework.system.AuraContext.Authentication;
 import org.auraframework.system.AuraContext.Mode;
@@ -101,6 +102,8 @@ public class RegistryServiceImpl implements RegistryService, SourceListener {
     private Collection<RegistryAdapter> adapters;
 
     private CachingService cachingService;
+
+    private LoggingService loggingService;
 
     @Inject
     private Optional<List<ComponentLocationAdapter>> locationAdapters;
@@ -361,18 +364,29 @@ public class RegistryServiceImpl implements RegistryService, SourceListener {
     @Override
     public RegistrySet getDefaultRegistrySet(Mode mode, Authentication access) {
         if (cachingService == null || mode == null || access == null) {
+            if (loggingService != null) {
+                loggingService.warn("RegistryServiceImpl.getDefaultRegistrySet(): Building uncached registry set for ["
+                        + mode + ", " + access + "]");
+            }
             return buildDefaultRegistrySet(mode, access);
         }
 
         Cache<RegistrySetKey, RegistrySet> cache = cachingService.getRegistrySetCache();
         if (cache == null) {
+            if (loggingService != null) {
+                loggingService.warn("RegistryServiceImpl.getDefaultRegistrySet(): Building uncached registry set for ["
+                        + mode + ", " + access + "] since cache is not available");
+            }
             return buildDefaultRegistrySet(mode, access);
         }
 
         // build cachekey
         String sessionCacheKey = configAdapter.getSessionCacheKey();
         if (sessionCacheKey == null) {
-
+            if (loggingService != null) {
+                loggingService.warn("RegistryServiceImpl.getDefaultRegistrySet(): Building uncached registry set for ["
+                        + mode + ", " + access + "] since cache key is not available");
+            }
             // if session cache key is null, it means that we're not caching this.
             return buildDefaultRegistrySet(mode, access);
         }
@@ -388,6 +402,10 @@ public class RegistryServiceImpl implements RegistryService, SourceListener {
                     if (res == null) {
                         // see com.google.common.cache.Cache#get; this method may never return null.
                         throw new NullPointerException("null RegistrySet for key=" + registrySetCacheKey);
+                    }
+                    if (loggingService != null) {
+                        loggingService.info("RegistryServiceImpl.getDefaultRegistrySet(): Caching registry set for key["
+                                + mode + ", " + access + ", " + sessionCacheKey + "]: " + res.getAllRegistries());
                     }
                     return res;
                 }
@@ -585,5 +603,10 @@ public class RegistryServiceImpl implements RegistryService, SourceListener {
     @Inject
     public void setCachingService(CachingService cachingService) {
         this.cachingService = cachingService;
+    }
+
+    @Inject
+    public void setLoggingService(LoggingService loggingService) {
+        this.loggingService = loggingService;
     }
 }
