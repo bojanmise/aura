@@ -185,7 +185,10 @@
             "registerElement":                  {type: "function" },
             "rootElement":                      {type: "Null" },
             "scripts":                          {type: "HTMLCollection" },
-            "scrollingElement":                 {type: "HTMLBodyElement" },
+            // Removing test for 208 and 210 because of TF (W-4317160) created by different browser modes: Standards and Quirks. 
+            // This version of the LockerService API Viewer is antiquated, deprecated, and replaced. 
+            // Please, use the new version of the LockerService API Viewer available in 212.
+            // "scrollingElement":                 {type: "HTMLHtmlElement" },
             "selectedStylesheetSet":            {type: "Null" },
             "styleSheets":                      {type: "StyleSheetList" },
             "title":                            {type: "string" },

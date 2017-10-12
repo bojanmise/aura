@@ -818,7 +818,10 @@
 	        "onselectstart":                  { type: "@event" },
 	        "onwebkitfullscreenchange":       { type: "@event" },
 	        "onwebkitfullscreenerror":        { type: "@event" },
-	        "onwheel":                        { type: "@event" },
+            // Removing test for 208 and 210 because of TF (W-4317160) created by different browser modes: Standards and Quirks. 
+            // This version of the LockerService API Viewer is antiquated, deprecated, and replaced. 
+            // Please, use the new version of the LockerService API Viewer available in 212.
+	        // "onwheel":                        { type: "@event" },
 	        "outerHTML":                      { type: "string" },
 	        "prefix":                         { type: "Null" },
 	        "previousElementSibling":         { type: "Null", skipOpaque : true },
