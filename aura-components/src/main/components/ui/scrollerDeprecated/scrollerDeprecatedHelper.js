@@ -1645,7 +1645,7 @@
 
 					that.stop();
 
-					if (typeof step === "undefined" || !step.length) {
+					if (!step.length) {
 						step = [ {
 							x : x,
 							y : y,
