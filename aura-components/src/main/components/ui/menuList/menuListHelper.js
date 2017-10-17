@@ -74,8 +74,13 @@
     setMenuItemFocus: function(component, index) {
         var menuItem = this.getMenuItem(component, index);
         if (menuItem && menuItem.isValid() && menuItem.getElement()) {
-            menuItem.setFocus();
-            this.fireMenuFocusChangeEvent(component, null, menuItem);
+            // W-4380795 https://gus.lightning.force.com/one/one.app#/sObject/a07B00000044x7AIAQ/view
+            // focus() call happens before the position acutally done.
+            // so delay the focus to next loop.
+            window.requestAnimationFrame($A.getCallback(function() {
+                menuItem.setFocus();
+                this.fireMenuFocusChangeEvent(component, null, menuItem);
+            }).bind(this));
         }
     },
 
