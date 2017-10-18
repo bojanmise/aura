@@ -152,7 +152,7 @@ public abstract class BaseComponentDefImpl<T extends BaseComponentDef> extends
     private final int hashCode;
     private final boolean minifyEnabled;
 
-    private transient Boolean localDeps = null;
+    private transient volatile Boolean localDeps = null;
     private transient QuickFixException componentBuildError;
 
     private static <X extends Definition> DefDescriptor<X> getFirst(List<DefDescriptor<X>> list) {
@@ -372,7 +372,7 @@ public abstract class BaseComponentDefImpl<T extends BaseComponentDef> extends
      * Terminology: "remote" - a JavaScript provider or renderer "local" - a Java/Apex/server provider, renderer, or
      * model
      */
-    private synchronized void computeLocalDependencies(Set<DefDescriptor<?>> processed) throws QuickFixException {
+    private void computeLocalDependencies(Set<DefDescriptor<?>> processed) throws QuickFixException {
         if (localDeps != null) {
             return;
         }
