@@ -46,7 +46,7 @@ function Component(config, localCreation) {
     this.localIndex = {};
     this.destroyed=0;
     this.version = config["version"];
-    this.owner = $A.clientService.currentAccess;
+    this.owner = $A.clientService.getCurrentAccessGlobalId();
     this.name='';
     this.type='';
     this._marker = null;
@@ -1536,7 +1536,7 @@ Component.prototype.setAttributeValueProvider = function (avp) {
     if(avp) {
         // JBA: without this, programmatically created components exhibit indeterministic owners
         // with no way for the creator to fix
-        this.owner = avp;
+        this.owner = avp.globalId;
     }
 };
 
@@ -1564,10 +1564,10 @@ Component.prototype.getComponentValueProvider = function() {
  * @export
  */
 Component.prototype.getOwner = function() {
-    if(!this.owner){
-        this.owner=this.getAttributeValueProvider();
+    if($A.util.isUndefinedOrNull(this.owner)){
+        this.owner = this.getAttributeValueProvider().globalId;
     }
-    return this.owner;
+    return $A.componentService.get(this.owner);
 };
 
 /**
@@ -2666,7 +2666,10 @@ Component.prototype.doDeIndex = function() {
         if(valueProvider instanceof PassthroughValue){
             valueProvider=valueProvider.getComponent();
         }
-        valueProvider.deIndex(localId, this.globalId);
+        //Don't do anything if the valueProvider does not exist (likely already removed).
+        if(!$A.util.isUndefinedOrNull(valueProvider)) {
+            valueProvider.deIndex(localId, this.globalId);
+        }
     }
 };
 
