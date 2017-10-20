@@ -29,6 +29,7 @@
  */
 function AuraInstance () {
     this.globalValueProviders = {};
+    this.deprecationUsages    = {};
     this.displayErrors        = true;
 
     this.logger               = new Aura.Utils.Logger();
@@ -1292,82 +1293,80 @@ AuraInstance.prototype.trace = function() {
  * Called from methods that have entered or are entering the deprecation pipeline. Provides first warnings, then errors to developers.
  * When possible, includes a workaround for the behavior or method being deprecated.
  *
- * @param {String} message The message to provide the developer indicating the method or behavior which has been or is being deprecated.
- * @param {String} workaround Any known or suggested workaround to accomplish the behavior being deprecated.
- * @param {Date} sinceDate The date since when the calling method has entered the deprecation pipeline. If omitted, deprecation is considered immediate.
- * @param {Date} dueDate The date at which the calling method is considered deprecated, and becomes an error. If omitted, deprecation is considered due upon the elapse of a default time period after 'sinceDate'.
+ * It reports the deprecation usages to server if reportSignature is provided.
+ *
+ * @param {String} message - The message to provide the developer indicating the method or behavior which has been or is being deprecated.
+ * @param {String} workaround - Any known or suggested workaround to accomplish the behavior being deprecated.
+ * @param {Date} sinceDate - The date since when the calling method has entered the deprecation pipeline. If omitted, deprecation is considered immediate.
+ * @param {Date} dueDate - The date at which the calling method is considered deprecated, and becomes an error. If omitted, deprecation is considered due upon the elapse of a default time period after 'sinceDate'.
+ * @param {String} reportSignature - The deprecated function name if deprecating an API, or function signature if deprecating a function signature.
+ *
  * @private
  * */
-AuraInstance.prototype.deprecated = function(message,workaround,sinceDate,dueDate){
-    //#if {"excludeModes" : ["PRODUCTION"]}
-    // This should be moved out to a constant, once we decide on the actual value.
-    var DEFAULT_DEPRECATION=1000*60*60*24*28; // Four weeks
-    var TEST_BUFFER=1000*60*60*24*14; // Two weeks
-    var testDueDate;
-    if(!dueDate){
-        if(!sinceDate){
-            dueDate=testDueDate=new Date();
-        }else {
-            sinceDate=new Date(sinceDate);
-            dueDate=new Date(sinceDate);
-            dueDate.setTime(dueDate.getTime() + DEFAULT_DEPRECATION);
-            testDueDate=new Date(dueDate.getTime() - TEST_BUFFER);
-        }
-    }else{
-        dueDate=new Date(dueDate);
-        testDueDate=new Date(dueDate);
-        testDueDate.setTime(testDueDate.getTime() - TEST_BUFFER);
-        if(!sinceDate) {
-            sinceDate = new Date(dueDate);
-            sinceDate.setTime(sinceDate.getTime() - DEFAULT_DEPRECATION);
-        }else{
-            sinceDate=new Date(sinceDate);
-        }
+AuraInstance.prototype.deprecated = function(message, workaround, sinceDate, dueDate, reportSignature) {
+
+// JBUCH: TEMPORARILY IGNORE CALLS BY ui: and aura: NAMESPACES.
+    // REMOVE WHEN VIEW LOGIC IS COMPILED WITH FRAMEWORK.
+    var callingCmp = $A.clientService.getCurrentAccessName();
+    if (/^(ui|aura):\w+$/.test(callingCmp)) {
+        return;
     }
-    var caller=new Error();
-    if(!caller.stack){
-        try{
-            throw caller;
-        }catch(e){
-            caller=e;
-        }
-    }
-    caller=(caller.stack||'').split('\n')[3]||'at unknown location';
-    message=$A.util.format("DEPRECATED (as of {0}, unusable on {1}): {2}\n\t{3}\n{4}",
-        $A.localizationService.formatDate(sinceDate),
-        $A.localizationService.formatDate(dueDate),
-        message,
-        $A.util.trim(caller),
-        workaround?"Workaround: "+workaround:"No known workaround."
-    );
 
     // JBUCH: TEMPORARILY IGNORE CALLS BY FRAMEWORK.
     // REMOVE WHEN ALL @public METHODS HAVE BEEN ADDRESSED.
-    if(caller.indexOf("/aura_")>-1) {
-        // $A.log("Framework use of deprecated method: " + message);
+    var callStack = new Error().stack;
+    // skip if no stack info, due to perf. (IE)
+    if (!callStack) {
         return;
     }
 
-    // JBUCH: TEMPORARILY IGNORE CALLS BY ui: and aura: NAMESPACES.
-    // REMOVE WHEN VIEW LOGIC IS COMPILED WITH FRAMEWORK.
-    if(/^(ui|aura):\w+$/.test($A.clientService.currentAccess&&$A.clientService.currentAccess.getType())){
-        // $A.log("Framework component use of deprecated method: "+message);
+    // TODO: This filter may have false positive when a function is installed a override
+    // It assumes the stack strace is formatted as:
+    //      Error: error message
+    //          at AuraInstance.$deprecated$
+    //          at [The Deprecated API]
+    //          at [The Caller]
+    var caller = callStack.split('\n', 4)[3];
+    if (!caller || caller.indexOf("/aura_") > -1) {
         return;
     }
-    if(Date.now()>=dueDate){
-        $A.warning(message);
-        // JBUCH: TODO: REACTIVATE ONCE CRUC IS IN PLACE
-        //throw new Error(message);
-    }else{
-        $A.warning(message);
+
+    //#if {"excludeModes" : ["PRODUCTION"]}
+    if (workaround) {
+        message += ". Workaround: " + workaround;
     }
+    $A.warning("Deprecation warning: " + message);
     //#end
-    //#if {modes:["TESTING", "TESTINGDEBUG", "AUTOTESTING", "AUTOTESTINGDEBUG"]}
-    // BREAK EARLY IN TESTS
-    if(Date.now()>=testDueDate){
-        $A.warning(message);
-        // JBUCH: TODO: REACTIVATE ONCE CRUC IS IN PLACE
-        //throw new Error(message);
+
+
+    //#if {modes: ["PRODUCTION", "PRODUCTIONDEBUG"]}
+    // skip reporting, if there's no reporting signature.
+    if (reportSignature) {
+        var reporting = false;
+        var callers = this.deprecationUsages[reportSignature];
+        if (callers === undefined) {
+            callers = [];
+            this.deprecationUsages[reportSignature] = callers;
+            // reporting when the deprecated API gets called for the first time
+            reporting = true;
+        }
+
+        callers.push(callingCmp? callingCmp : "UNKNOWN");
+
+        // reporting when a deprecated API gets called 5 times
+        if (reporting || callers.length === 5) {
+            // Caboose action
+            var reportAction = $A.get("c.aura://ComponentController.reportDeprecationUsages");
+            reportAction.setParams({
+                "usages": $A.util.apply({}, this.deprecationUsages)
+            });
+
+            $A.clientService.enqueueAction(reportAction);
+
+            for (var api in this.deprecationUsages) {
+                this.deprecationUsages[api] = [];
+            }
+        }
     }
     //#end
 };
