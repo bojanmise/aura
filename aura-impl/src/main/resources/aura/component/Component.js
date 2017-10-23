@@ -837,6 +837,8 @@ Component.prototype.destroy = function() {
         for(var x in expressions){
             expressions[x].removeChangeHandler(this,"v."+x);
         }
+        //break link to AttributeSet instance once it has been destroyed
+        this.attributeSet = null;
     }
     var references=this.references;
     for(var key in references){
@@ -916,6 +918,18 @@ Component.prototype.destroy = function() {
     // Destroy immediate parent
     if(this.superComponent){
         this.superComponent.destroy();
+    }
+
+    // Destroy valueProviders
+    // AttributeSet was leaking becasue it was tied to valueProviders
+    var vp = this.valueProviders;
+    if(vp) {
+        for(var k in vp) {
+            var v = vp[k];
+            if (v && v !== this) {
+                vp[k] = null;
+            }
+        }
     }
 
     // Destroyed. Mark invalid
