@@ -225,6 +225,7 @@
 
         for (var i = 0; i < len; i++) {
             var config = tabValues.get ? tabValues.get(i) : tabValues[i];
+            config["skipCreationPath"] = true;
             var newComponent = $A.createComponentFromConfig(config);
             fn(newComponent);
 

@@ -370,7 +370,8 @@ AuraComponentService.prototype.createInternalConfig = function (config) {
         "attributes"   : {
             "values"        : config["attributes"],
             "valueProvider" : config["valueProvider"]
-        }
+        },
+        "skipCreationPath": !!config["skipCreationPath"]
     };
 };
 
