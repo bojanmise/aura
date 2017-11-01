@@ -118,8 +118,11 @@ InteropComponent.prototype.setupAttributes = function(config) {
 
         // Check typeof PRV | FCV
         if ($A.util.isExpression(valueConfig)) {
-            // PRV typeconfigValues.callbackaction
-            if (valueConfig.getExpression) { // Fastest typeof for PRV
+            // GVP
+            if (valueConfig.getIsGlobal && valueConfig.getIsGlobal()) {
+                valueConfig = valueConfig.evaluate();
+                // PRV typeconfigValues.callbackaction
+            } else if (valueConfig.getExpression) {  // Fastest typeof for PRV
                 var key = $A.expressionService.normalize(valueConfig.getExpression());
                 var provider = key.split('.')[0];
                 var isPTV = valueProvider instanceof PassthroughValue;
@@ -505,8 +508,6 @@ InteropComponent.prototype.addValueHandler = function(){
 };
 
 InteropComponent.prototype.removeValueHandler = function() {};
-
-
 
 /**
  * @protected
