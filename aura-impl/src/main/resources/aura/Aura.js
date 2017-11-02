@@ -303,9 +303,12 @@ if (Aura["initConfig"]) {
         delete Aura["inlineJsLocker"];
     }
 
-    setTimeout(function () {
-        $A.initAsync(Aura["initConfig"]);
-    }, 0);
+    // Lightning Out must call $A.initAsync with its own config 
+    if (!Aura["lightningOut"]) {
+        setTimeout(function () {
+            $A.initAsync(Aura["initConfig"]);
+        }, 0);
+    }
 }
 
 // External libraries (like moment.js) will be appended here
