@@ -403,10 +403,6 @@ public class RegistryServiceImpl implements RegistryService, SourceListener {
                         // see com.google.common.cache.Cache#get; this method may never return null.
                         throw new NullPointerException("null RegistrySet for key=" + registrySetCacheKey);
                     }
-                    if (loggingService != null) {
-                        loggingService.info("RegistryServiceImpl.getDefaultRegistrySet(): Caching registry set for key["
-                                + mode + ", " + access + ", " + sessionCacheKey + "]: " + res.getAllRegistries());
-                    }
                     return res;
                 }
             });
