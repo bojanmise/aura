@@ -9626,7 +9626,10 @@ return {
   "renderer":{
     "afterRender":function(cmp) {
         
-    	cmp.find("tabBody").getElement().setAttribute("id", cmp.getGlobalId());
+        var body = cmp.find("tabBody");
+        var el = body && body.getElement();
+        el && el.setAttribute("id", cmp.getGlobalId());
+        
         cmp.superAfterRender();
     }
   }
