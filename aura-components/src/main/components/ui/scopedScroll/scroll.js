@@ -73,19 +73,20 @@ function lib() { //eslint-disable-line no-unused-vars
         scope: function (element) {
             var dom = typeof element === 'string' ? document.querySelector(element) : element;
             if (dom && !dom._scopedScroll) {
-
                 // mark scoped scroll for later so this
                 // does not need to be recomputed
-                dom.setAttribute('data-scoped-scroll', true);
-                dom.addEventListener('mousewheel', mouseWheelHandler, false);
+                dom.setAttribute && dom.setAttribute('data-scoped-scroll', true);
+                dom.addEventListener && dom.addEventListener('mousewheel', mouseWheelHandler, false);
                 dom._scopedScroll = true;
             }
         },
         unscope: function (element) {
             var dom = typeof element === 'string' ? document.querySelector(element) : element;
-            dom.removeAttribute('data-scoped-scroll');
-            dom.removeEventListener('mousewheel', mouseWheelHandler, false);
-            dom._scopedScroll = false;
+            if (dom) {
+                dom.removeAttribute && dom.removeAttribute('data-scoped-scroll');
+                dom.removeEventListener && dom.removeEventListener('mousewheel', mouseWheelHandler, false);
+                dom._scopedScroll = false;
+            }
         }
     };
 }
